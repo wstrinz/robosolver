@@ -1,6 +1,6 @@
 module Robosolver
   class Cell
-    attr_reader :x, :y, :name
+    attr_reader :x, :y, :name, :walls
     attr_accessor :neighbors
 
     def initialize(name, x, y, board)
@@ -9,6 +9,7 @@ module Robosolver
       @board = board
       @name = name
       @neighbors = []
+      @walls = []
     end
 
     def walkable_neighbours
