@@ -6,18 +6,27 @@ import Signal -- exposing (Html)
 import List exposing (map)
 
 -- type alias Model = { currentSong: String, loaded: Bool, position: Float, state: String, trackList: TrackList }
-type alias Model = { board: List (Cell) }
+type alias Model = { board: Board }
+type alias Board = { maxx: Int, maxy: Int, rows: List (List Cell) }
 
 type alias Cell = { name: String, x: Int, y: Int, note: String }
 
 initialCell : Cell
-initialCell = { name = "AnCell", x = 1, y = 2, note="" }
+initialCell = { name = "A", x = 0, y = 0, note = "" }
+
+initialCell2 : Cell
+initialCell2 = { name = "B", x = 1, y = 0, note = "" }
 
 otherCell : Cell
-otherCell = { name = "AnotherCell", x = 2, y = 2, note="borp" }
+otherCell = { name = "C", x = 0, y = 1, note = "" }
 
+otherCell2 : Cell
+otherCell2 = { name = "D", x = 1, y = 1, note = "" }
+
+initialBoard : Board
+initialBoard = { rows = [[initialCell, initialCell2],[otherCell, otherCell2]], maxx = 2, maxy = 2   }
 initialModel : Model
-initialModel = { board = [initialCell, otherCell] }
+initialModel = { board = initialBoard }
 
 type CellOperation =
   Nothin
@@ -39,42 +48,50 @@ main = Signal.map (view actions.address) model
 
 update : Action -> Model -> Model
 update action model =
-  case action of
-    NoOp -> model
-    CellUpdate operation cell ->
-      case operation of
-        Nothin -> model
-        SetNote newNote -> { model | board = updateCellNote model.board cell newNote }
+  let
+    board = model.board
+    rows = model.board.rows
+  in
+    case action of
+      NoOp -> model
+      CellUpdate operation cell ->
+        case operation of
+          Nothin -> model
+          SetNote newNote ->
+              { model | board = { board | rows = List.map (updateIfIsCell cell newNote) rows } }
 
-updateCellNote : List (Cell) -> Cell -> String -> List (Cell)
-updateCellNote board cell newNote =
-   List.map (updateIfIsCell cell newNote) board
-
-updateIfIsCell : Cell -> String -> Cell -> Cell
-updateIfIsCell targetCell newNote currentCell =
-  if currentCell == targetCell then
-    {currentCell | note = newNote}
-  else
-    currentCell
+updateIfIsCell : Cell -> String -> List Cell -> List Cell
+updateIfIsCell targetCell newNote currentRow =
+  List.map (\cell ->
+              if cell == targetCell then
+                {cell | note = newNote}
+              else
+                cell
+                ) currentRow
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model = div [] [
-  p [] [text (toString model.board)],
-  cellsDiv address model
+    p [] [text (toString model.board)],
+    Html.table [] (cellsDiv address model)
   ]
 
 
-cellsDiv : Signal.Address Action -> Model -> Html.Html
+cellsDiv : Signal.Address Action -> Model -> List Html
 cellsDiv address model =
-  div [] (List.map (cellDiv address) model.board)
+  List.map (cellRow address) model.board.rows
 
-cellDiv : Signal.Address Action -> Cell -> Html.Html
-cellDiv address cell =
-  div [] [
-          p [] [text (cell.name ++ "_" ++ (toString cell.x) ++ "_" ++ (toString cell.y) ++ "_" ++ cell.note)],
-          button [ onClick address (CellUpdate (SetNote "Lol") cell)] [ text "Update" ]
+cellRow : Signal.Address Action -> List Cell -> Html.Html
+cellRow address row = Html.tr [] (List.map (cellCol address) row)
+
+cellCol : Signal.Address Action -> Cell -> Html.Html
+cellCol address cell =
+ Html.td [] [
+          p [] [text (cellDesc cell)],
+          button [ onClick address (CellUpdate (SetNote "x") cell)] [ text "Update" ]
          ]
 
+cellDesc : Cell -> String
+cellDesc cell = (cell.name ++ "_" ++ (toString cell.x) ++ "_" ++ (toString cell.y) ++ "_" ++ cell.note)
 -- port playSong : Signal String
 -- port playSong = Signal.map toString playerActions.signal
 
