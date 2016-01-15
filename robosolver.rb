@@ -1,0 +1,7 @@
+require_relative 'entities/board'
+require_relative 'entities/cell'
+require_relative 'entities/robit'
+require_relative 'solvers/base'
+require_relative 'solvers/a_star'
+require_relative 'solvers/bfs'
+require_relative 'solvers/djikstra'
