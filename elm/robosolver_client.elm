@@ -1,32 +1,31 @@
 module RobosolverClient where
 import Html exposing (Html, div, text, button, p, br)
-import Html.Attributes exposing (src, attribute)
+import Html.Attributes exposing (src, attribute, style)
 import Html.Events exposing (onClick)
 import Signal -- exposing (Html)
 import List exposing (map)
 
--- type alias Model = { currentSong: String, loaded: Bool, position: Float, state: String, trackList: TrackList }
 type alias Model = { board: Board }
 type alias Board = { maxx: Int, maxy: Int, rows: List (List Cell) }
 
 type alias Cell = { name: String, x: Int, y: Int, note: String }
 
-initialCell : Cell
-initialCell = { name = "A", x = 0, y = 0, note = "" }
-
-initialCell2 : Cell
-initialCell2 = { name = "B", x = 1, y = 0, note = "" }
-
-otherCell : Cell
-otherCell = { name = "C", x = 0, y = 1, note = "" }
-
-otherCell2 : Cell
-otherCell2 = { name = "D", x = 1, y = 1, note = "" }
-
+initialX = 10
+initialY = 10
 initialBoard : Board
-initialBoard = { rows = [[initialCell, initialCell2],[otherCell, otherCell2]], maxx = 2, maxy = 2   }
+initialBoard = { rows = (initializeRows initialX initialY), maxx = initialX, maxy = initialY }
+
 initialModel : Model
 initialModel = { board = initialBoard }
+
+initializeRows : Int -> Int -> List (List Cell)
+initializeRows x y = List.map (initRow x) [1..y]
+
+initRow : Int -> Int -> List Cell
+initRow length y = List.map (initCell y) [1..length]
+
+initCell : Int -> Int -> Cell
+initCell y x = { name = ("C"++(toString x)++"_"++(toString y)), x = x, y = y, note = "" }
 
 type CellOperation =
   Nothin
@@ -72,7 +71,7 @@ updateIfIsCell targetCell newNote currentRow =
 view : Signal.Address Action -> Model -> Html.Html
 view address model = div [] [
     p [] [text (toString model.board)],
-    Html.table [] (cellsDiv address model)
+    Html.table [style [("border", "solid 1px black")]] (cellsDiv address model)
   ]
 
 
@@ -87,14 +86,13 @@ cellCol : Signal.Address Action -> Cell -> Html.Html
 cellCol address cell =
  Html.td [] [
           p [] [text (cellDesc cell)],
-          button [ onClick address (CellUpdate (SetNote "x") cell)] [ text "Update" ]
+          button [ onClick address (CellUpdate (SetNote "x") cell)] [ text "x" ]
          ]
 
 cellDesc : Cell -> String
 cellDesc cell = (cell.name ++ "_" ++ (toString cell.x) ++ "_" ++ (toString cell.y) ++ "_" ++ cell.note)
+
 -- port playSong : Signal String
 -- port playSong = Signal.map toString playerActions.signal
 
 -- port songPos : Signal Float
-
--- port trackList : Signal (List String)
