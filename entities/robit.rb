@@ -1,6 +1,8 @@
 module Robosolver
   class Robit
-    attr_reader :x, :y, :color
+    include Entity
+
+    attr_reader :color
 
     def initialize(x, y, color, board)
       @x = x

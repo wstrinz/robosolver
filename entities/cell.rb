@@ -1,6 +1,8 @@
 module Robosolver
   class Cell
-    attr_reader :x, :y, :name, :walls
+    include Entity
+    
+    attr_reader :walls
     attr_accessor :neighbors
 
     def initialize(name, x, y, board)
