@@ -4,7 +4,7 @@ module Robosolver
       include Base
 
       def solve
-        bfs(start, target).flatten
+        bfs(start, target).flatten.map(&:name)
       end
 
       private

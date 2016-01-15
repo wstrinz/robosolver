@@ -77,7 +77,7 @@ describe Robosolver do
 
       it "solves the board" do
         solution = solver.find_path(robit.x, robit.y, targetx, targety)
-        expect(solution).to eq(dumb_bfs_solution.map{|x,y| board.at(x,y)})
+        expect(solution).to eq(dumb_bfs_solution.map{|x,y| board.at(x,y).name})
       end
     end
 
