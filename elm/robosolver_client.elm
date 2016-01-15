@@ -4,20 +4,23 @@ import Html.Attributes exposing (src, attribute, style)
 import Html.Events exposing (onClick)
 import Signal -- exposing (Html)
 import List exposing (map)
+import Set exposing (Set, singleton)
 
-type alias Model = { board: Board, activeCell: Maybe Cell }
+type alias Coords = (Int, Int)
+type alias Model = { board: Board, activeCells: Set (Int, Int), isClicking: Bool }
 type alias Board = { maxx: Int, maxy: Int, rows: List (List Cell) }
 
-type alias Cell = { name: String, x: Int, y: Int, note: String, walls: List String }
+type alias Cell = { name: String, x: Int, y: Int, note: String, walls: Set String }
 
 initialX = 16
 initialY = 16
+genWalls = False
 
 initialBoard : Board
 initialBoard = { rows = (initializeRows initialX initialY), maxx = initialX, maxy = initialY }
 
 initialModel : Model
-initialModel = { board = initialBoard, activeCell = Nothing }
+initialModel = { board = initialBoard, activeCells = Set.empty, isClicking = False }
 
 initializeRows : Int -> Int -> List (List Cell)
 initializeRows x y = List.map (initRow x) [1..y]
@@ -29,15 +32,18 @@ initCell : Int -> Int -> Cell
 initCell y x =
     let
       walls =
-        -- if x % 3 == 0 then
-        --   ["left"]
-        -- else if y % 5 == 0 then
-        --   ["top"]
-        -- else
-          []
+        case genWalls of
+          True ->
+            if x % 3 == 0 then
+              singleton "left"
+            else if y % 5 == 0 then
+              singleton "top"
+            else
+              Set.empty
+          False ->
+            Set.empty
     in
       { name = "c",
-      -- { name = ("c"++(toString x)++"_"++(toString y)),
         x = x, y = y,
         note = "",
         walls = walls }
@@ -50,11 +56,9 @@ type CellOperation =
 
 type Action =
   NoOp
+    | ResetActiveCells
+    | SetClicking Bool
     | CellUpdate CellOperation Cell
-
-
--- activeCell : Signal.Mailbox (Maybe Cell)
--- activeCell = Signal.mailbox Nothing
 
 actions : Signal.Mailbox Action
 actions = Signal.mailbox NoOp
@@ -73,14 +77,23 @@ update action model =
   in
     case action of
       NoOp -> model
+      ResetActiveCells -> { model | activeCells = Set.empty }
+      SetClicking val -> { model | isClicking = val }
       CellUpdate operation cell ->
         case operation of
           Nothin -> model
-          SetActive -> { model | activeCell = Just cell }
+          SetActive ->
+            case model.isClicking of
+              False -> model
+              True ->
+                if (inActiveCells cell model)  then
+                  { model | activeCells = Set.remove (cell.x, cell.y) model.activeCells }
+                else
+                  { model | activeCells = Set.insert (cell.x, cell.y) model.activeCells }
           SetNote newNote ->
               { model | board = { board | rows = List.map (updateIfIsCell cell newNote) rows } }
           ToggleWall dir ->
-              { model | board = { board | rows = List.map (updateWallsIfCell cell dir) rows } }
+              { model | board = { board | rows = List.map (updateWallsIfCell model dir) rows } }
 
 updateIfIsCell : Cell -> String -> List Cell -> List Cell
 updateIfIsCell targetCell newNote currentRow =
@@ -91,48 +104,90 @@ updateIfIsCell targetCell newNote currentRow =
                 cell
                 ) currentRow
 
-updateWallsIfCell : Cell -> String -> List Cell -> List Cell
-updateWallsIfCell targetCell wall currentRow =
-  List.map (updateWallsIfCellSingular targetCell wall) currentRow
+updateWallsIfCell : Model -> String -> List Cell -> List Cell
+updateWallsIfCell model wall currentRow =
+    List.map (updateWallsIfCellSingular model wall) currentRow
 
-updateWallsIfCellSingular : Cell -> String -> Cell -> Cell
-updateWallsIfCellSingular targetCell wall currentCell =
+updateWallsIfCellSingular : Model -> String -> Cell -> Cell
+updateWallsIfCellSingular model wall currentCell =
   let
-    isMatch = coordsMatch targetCell currentCell
+    isMatch = inActiveCells currentCell model
   in
     case isMatch of
       True ->
-        if List.member wall currentCell.walls then
-          {currentCell | walls = List.filter (\item -> item /= wall) currentCell.walls }
+        if Set.member wall currentCell.walls then
+          {currentCell | walls = Set.remove wall currentCell.walls }
         else
-          {currentCell | walls = wall :: currentCell.walls }
+          {currentCell | walls = Set.insert wall currentCell.walls }
       False ->
         currentCell
 
 coordsMatch : Cell -> Cell -> Bool
 coordsMatch a b = a.x == b.x && a.y == b.y
 
+inActiveCells : Cell -> Model -> Bool
+inActiveCells cell model =
+    Set.member (cell.x, cell.y) model.activeCells
+
 view : Signal.Address Action -> Model -> Html.Html
-view address model = div [] [
-    cellEditor address model,
-    Html.table [style [("border", "solid 1px black")]] (cellsDiv address model)
+view address model = div [Html.Events.onMouseUp address (SetClicking False), style noSelectStyle] [
+    button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
+    Html.table [style [("border", "solid 1px black")]] (cellsDiv address model),
+    cellEditor address model
   ]
+
+noSelectStyle = [
+  ("-webkit-touch-callout", "none"),
+  ("-webkit-user-select", "none"),
+  ("-khtml-user-select", "none"),
+  ("-moz-user-select", "none"),
+  ("-ms-user-select", "none"),
+  ("user-select", "none")
+  ]
+
+findCell : Coords -> Model -> Maybe Cell
+findCell coords model =
+  let
+    found = List.head (List.filter (\cell -> coords == (cell.x, cell.y)) (List.concat model.board.rows))
+  in
+    found
 
 cellEditor : Signal.Address Action -> Model -> Html.Html
 cellEditor address model =
-  case model.activeCell of
-    Nothing -> div [] [text "(not editing a cell)"]
+  let
+    firstOfSet = List.head (Set.toList model.activeCells)
+    anActiveCell =
+      case firstOfSet of
+        Nothing -> Nothing
+        Just coords -> findCell coords model
+  in
+  case anActiveCell of
+    Nothing -> div [] [text "(not editing a cell)",
+                       div [] disabledWallButtons]
     Just cell ->
-      div [] [
-        p [] [text ("editing " ++ (toString cell))],
         div [] [
-          p [] [text "Toggle Walls"],
-          button [ onClick address (CellUpdate (ToggleWall "left") cell)] [ text "Left" ],
-          button [ onClick address (CellUpdate (ToggleWall "right") cell)] [ text "Right" ],
-          button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
-          button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ]
+          p [] (List.map (\thecell -> text ("editing " ++ (toString thecell))) (Set.toList model.activeCells)),
+          div [] (realWallButtons address cell)
         ]
-      ]
+
+realWallButtons : Signal.Address Action -> Cell -> List Html.Html
+realWallButtons address cell = [
+            p [] [text "Toggle Walls"],
+            button [ onClick address (CellUpdate (ToggleWall "left") cell)] [ text "Left" ],
+            button [ onClick address (CellUpdate (ToggleWall "right") cell)] [ text "Right" ],
+            button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
+            button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ]
+          ]
+
+disabledWallButtons : List Html.Html
+disabledWallButtons =
+  [
+    p [] [text "Toggle Walls"],
+    button [] [ text "Left" ],
+    button [] [ text "Right" ],
+    button [] [ text "Top" ],
+    button [] [ text "Bottom" ]
+    ]
 
 cellsDiv : Signal.Address Action -> Model -> List Html
 cellsDiv address model =
@@ -143,7 +198,11 @@ cellRow address model row = Html.tr [] (List.map (cellCol address model) row)
 
 cellCol : Signal.Address Action -> Model -> Cell -> Html.Html
 cellCol address model cell =
- Html.td [style (cellStyle model cell), onClick address (CellUpdate SetActive cell)] [
+ Html.td [
+           style (cellStyle model cell),
+           Html.Events.onMouseDown address (SetClicking True),
+           Html.Events.onMouseEnter address (CellUpdate SetActive cell)
+         ] [
           p [] [text (cellDesc cell)]
           -- button [ onClick address (CellUpdate (SetNote "o") cell)] [ text "n" ]
          ]
@@ -152,20 +211,20 @@ cellStyle : Model -> Cell -> List (String, String)
 cellStyle model cell = List.concat([cellWallStyleList cell, cellBgStyleList model cell])
 
 cellWallStyleList : Cell -> List (String, String)
-cellWallStyleList cell = List.map (\w -> ("border-" ++ w, "solid 1px black")) cell.walls
+cellWallStyleList cell = Set.toList (Set.map (\w -> ("border-" ++ w, "solid 1px black")) cell.walls)
 
 cellBgStyleList : Model -> Cell -> List (String, String)
 cellBgStyleList model cell =
-  case model.activeCell of
-    Nothing -> []
-    Just aCell ->
-      if cell.x == aCell.x && cell.y == aCell.y then
-        [("background-color", "aqua")]
-      else
-        []
+  let
+      isActive = Set.member (cell.x, cell.y) model.activeCells
+  in
+  case isActive of
+    True -> [("background-color", "aqua")]
+    False -> []
+
 
 cellDesc : Cell -> String
-cellDesc cell = (cell.name ++ "_" ++ cell.note)
+cellDesc cell = (cell.name ++ "-" ++ cell.note)
 
 -- port playSong : Signal String
 -- port playSong = Signal.map toString playerActions.signal
