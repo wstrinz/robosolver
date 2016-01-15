@@ -13,8 +13,11 @@ type alias Cell = { name: String, x: Int, y: Int, note: String }
 initialCell : Cell
 initialCell = { name = "AnCell", x = 1, y = 2, note="" }
 
+otherCell : Cell
+otherCell = { name = "AnotherCell", x = 2, y = 2, note="borp" }
+
 initialModel : Model
-initialModel = { board = [initialCell] }
+initialModel = { board = [initialCell, otherCell] }
 
 type CellOperation =
   Nothin
@@ -41,13 +44,18 @@ update action model =
     CellUpdate operation cell ->
       case operation of
         Nothin -> model
-        SetNote newNote -> { model | board = [updateCellNote cell newNote] }
+        SetNote newNote -> { model | board = updateCellNote model.board cell newNote }
 
-updateCellNote : Cell -> String -> Cell
-updateCellNote oldCell newNote =
-   {oldCell | note = newNote}
-   -- {name = oldCell.name, x = oldCell.x, y = oldCell.y, note = newNote}
+updateCellNote : List (Cell) -> Cell -> String -> List (Cell)
+updateCellNote board cell newNote =
+   List.map (updateIfIsCell cell newNote) board
 
+updateIfIsCell : Cell -> String -> Cell -> Cell
+updateIfIsCell targetCell newNote currentCell =
+  if currentCell == targetCell then
+    {currentCell | note = newNote}
+  else
+    currentCell
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model = div [] [
@@ -63,7 +71,7 @@ cellsDiv address model =
 cellDiv : Signal.Address Action -> Cell -> Html.Html
 cellDiv address cell =
   div [] [
-          p [] [text (cell.name ++ "_" ++ (toString cell.x) ++ "_" ++ (toString cell.y))],
+          p [] [text (cell.name ++ "_" ++ (toString cell.x) ++ "_" ++ (toString cell.y) ++ "_" ++ cell.note)],
           button [ onClick address (CellUpdate (SetNote "Lol") cell)] [ text "Update" ]
          ]
 
