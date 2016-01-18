@@ -36,6 +36,26 @@ describe Robosolver do
       it { expect(cell.y).to eq 2 }
       it { expect(cell.neighbors).to eq [] }
     end
+
+    describe "#walls" do
+      it { expect(cell.walls).to be_a Set}
+
+      describe "#add_wall" do
+        it do
+          cell.add_wall :left
+          expect(cell.walls.first).to eq :left
+        end
+      end
+
+      describe "#remove_wall" do
+        it do
+          cell.add_wall :left
+          expect(cell.walls.first).to eq :left
+          cell.remove_wall :left
+          expect(cell.walls.first).to eq nil
+        end
+      end
+    end
   end
 
   describe Robit do

@@ -12,7 +12,10 @@ type alias Board = { maxx: Int, maxy: Int, rows: List (List Cell) }
 
 type alias Cell = { name: String, x: Int, y: Int, note: String, walls: Set String }
 
+initialX : Int
 initialX = 16
+
+initialY : Int
 initialY = 16
 genWalls = False
 

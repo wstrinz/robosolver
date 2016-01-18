@@ -1,3 +1,5 @@
+require 'set'
+
 require_relative 'entities/entity'
 require_relative 'entities/board'
 require_relative 'entities/cell'
