@@ -179,7 +179,8 @@ realWallButtons address cell = [
             button [ onClick address (CellUpdate (ToggleWall "left") cell)] [ text "Left" ],
             button [ onClick address (CellUpdate (ToggleWall "right") cell)] [ text "Right" ],
             button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
-            button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ]
+            button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ],
+            Html.select [ ] [ text "red" ]
           ]
 
 disabledWallButtons : List Html.Html
