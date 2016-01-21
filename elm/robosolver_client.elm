@@ -8,11 +8,35 @@ import Set exposing (Set, singleton)
 
 type alias Coords = (Int, Int)
 type alias Model = { board: Board, activeCells: Set (Int, Int), isClicking: Bool }
-type alias Board = { maxx: Int, maxy: Int, rows: List (List Cell), walls: List Wall }
+type alias Board = { maxx: Int, maxy: Int, rows: List (List Cell), walls: Set Wall }
 
 type alias Cell = { name: String, x: Int, y: Int, note: String }
 
-type alias Wall = { startX: Int, endX: Int, startY: Int, endY: Int }
+type alias Wall = List Int
+type alias WallObject = { startX: Int, endX: Int, startY: Int, endY: Int }
+
+
+blankWallObj : WallObject
+blankWallObj = {startX = -1, endX = -1, startY = -1, endY = -1 }
+
+blankWall : Wall
+blankWall = [-1,-1,-1,-1]
+
+makeDummyCell : Int -> Int -> Cell
+makeDummyCell x y = { name = "dummy", note = "", x = x, y = y }
+
+dummyCell : Cell
+dummyCell = { name = "dummy", note = "", x = -1, y = -1 }
+
+cellForCoords : Coords -> Cell
+cellForCoords coords =
+  case coords of
+    (x, y) -> dummyCell
+-- objectForWall : Wall -> WallObject
+-- objectForWall wall obj =
+--   case wall of
+--     [Just sx, Just ex, Just sy, Just ey, xs] -> { startX = sx, endX = ex, startY = sy, endY = ex }
+--     _ -> blankWallObj
 
 initialX : Int
 initialX = 16
@@ -27,9 +51,8 @@ initialBoard = { rows = (initializeRows initialX initialY), maxx = initialX, max
 initialModel : Model
 initialModel = { board = initialBoard, activeCells = Set.empty, isClicking = False }
 
-initWalls : List Wall
-initWalls = [{startX = 3, startY = 4, endX = 3, endY = 5},
-             {startX = 6, startY = 6, endX = 7, endY = 6}]
+initWalls : Set Wall
+initWalls = Set.fromList [[2,2,1,2],[3,3,4,5]]
 
 initializeRows : Int -> Int -> List (List Cell)
 initializeRows x y = List.map (initRow x) [1..y]
@@ -78,6 +101,10 @@ model = Signal.foldp update initialModel actions.signal
 main : Signal Html.Html
 main = Signal.map (view actions.address) model
 
+wallsForActiveCells : Model -> String -> Set Wall
+wallsForActiveCells model dir =
+    Set.intersect (Set.map (\coord -> wallForDir coord dir) model.activeCells) model.board.walls
+
 update : Action -> Model -> Model
 update action model =
   let
@@ -104,27 +131,19 @@ update action model =
               { model | board = { board | rows = List.map (updateIfIsCell cell newNote) rows } }
           ToggleWall dir ->
             let
-              toggledWalls = List.map (\c ->
-                  case c of
-                    Nothing -> {startX = -1, endX = -1, startY = -1, endY = -1 }
-                    Just thecell -> (wallForDir thecell dir))
-                (List.map (\mc -> findCell mc model)
-                  (Set.toList model.activeCells))
-              toAdd = List.map (\wa ->
-                List.filter (\w -> (not (wallCoordsMatch w wa))) model.board.walls) toggledWalls
-            in
-              { model | board =
-                { board | walls =
-                  List.concat (List.append toAdd
-                    (List.map (\wa ->
-                      List.filter (\w -> (not (wallCoordsMatch w wa))) toggledWalls) model.board.walls))
-              } }
-              -- if (wallOnCellSide model cell dir) then
-              --   { model | board = { board | walls = List.filter (\w -> (not (wallCoordsMatch w newWall))) walls } }
-              -- else
-              --   { model | board = { board | walls = newWall :: walls } }
+              activeWalls = wallsForActiveCells model dir
 
-                -- { model | board = { board | rows = List.map (updateWallsIfCell model dir) rows } }
+              toAdd =
+                Set.diff activeWalls model.board.walls
+
+              toRemove =
+                Set.intersect activeWalls model.board.walls
+
+              newWalls =
+                Set.union walls toAdd
+                -- Set.union (Set.diff model.board.walls toRemove) toAdd
+            in
+              { model | board = { board | walls = newWalls } }
 
 updateIfIsCell : Cell -> String -> List Cell -> List Cell
 updateIfIsCell targetCell newNote currentRow =
@@ -139,23 +158,12 @@ updateWallsIfCell : Model -> String -> List Cell -> List Cell
 updateWallsIfCell model wall currentRow =
     List.map (updateWallsIfCellSingular model wall) currentRow
 
+-- TODO - currently broken
 updateWallsIfCellSingular : Model -> String -> Cell -> Cell
-updateWallsIfCellSingular model wall currentCell =
-  currentCell
-  -- let
-  --   isMatch = inActiveCells currentCell model
-  -- in
-  --   case isMatch of
-  --     True ->
-  --       if Set.member wall currentCell.walls then
-  --         {currentCell | walls = Set.remove wall currentCell.walls }
-  --       else
-  --         {currentCell | walls = Set.insert wall currentCell.walls }
-  --     False ->
-  --       currentCell
+updateWallsIfCellSingular model wall currentCell = currentCell
 
 wallCoordsMatch : Wall -> Wall -> Bool
-wallCoordsMatch a b = a.startX == b.startX && a.startY == b.startY && a.endX == b.endX && a.endY == b.endY
+wallCoordsMatch a b = a == b -- hopefully that's good enough?
 
 coordsMatch : Cell -> Cell -> Bool
 coordsMatch a b = a.x == b.x && a.y == b.y
@@ -168,8 +176,11 @@ view : Signal.Address Action -> Model -> Html.Html
 view address model = div [Html.Events.onMouseUp address (SetClicking False), style noSelectStyle] [
     button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
     Html.table [style [("border", "solid 1px black")]] (cellsDiv address model),
-    cellEditor address model
+    cellEditor address model,
+    modelDisp model
   ]
+
+modelDisp model = div [] [text (toString (wallsForActiveCells model "right"))]
 
 noSelectStyle = [
   ("-webkit-touch-callout", "none"),
@@ -240,7 +251,6 @@ cellCol address model cell =
            Html.Events.onMouseEnter address (CellUpdate SetActive cell)
          ] [
           p [] [text (cellDesc cell)]
-          -- button [ onClick address (CellUpdate (SetNote "o") cell)] [ text "n" ]
          ]
 
 cellStyle : Model -> Cell -> List (String, String)
@@ -252,19 +262,22 @@ cellWallStyleList model cell =
   in
     List.map (\w -> ("border-" ++ w, "solid 1px black")) wallSides
 
-wallForDir : Cell -> String -> Wall
-wallForDir cell direction =
-  case direction of
-    "left" -> {startX = cell.x, endX = cell.x, startY = cell.y, endY = cell.y + 1 }
-    "right" -> {startX = cell.x + 1, endX = cell.x + 1, startY = cell.y, endY = cell.y + 1 }
-    "top" -> {startX = cell.x, endX = cell.x + 1, startY = cell.y, endY = cell.y}
-    "bottom" -> {startX = cell.x, endX = cell.x + 1, startY = cell.y + 1, endY = cell.y + 1}
-    _ -> {startX = -1, endX = -1, startY = -1, endY = -1 }
-
 wallOnCellSide : Model -> Cell -> String -> Bool
 wallOnCellSide model cell direction =
-  List.member (wallForDir cell direction) model.board.walls
+  Set.member (wallForDir (cell.x, cell.y) direction) model.board.walls
 
+wallForDir : Coords -> String -> Wall
+wallForDir simpleCell direction =
+  let
+      x = fst simpleCell
+      y = snd simpleCell
+  in
+    case direction of
+      "left" -> [x, x, y, y + 1]
+      "right" -> [x + 1, x + 1, y, y + 1]
+      "top" -> [x, x + 1, y, y]
+      "bottom" -> [x, x + 1, y + 1, y + 1]
+      _ -> [-1, -1, -1, -1]
 
 cellBgStyleList : Model -> Cell -> List (String, String)
 cellBgStyleList model cell =
