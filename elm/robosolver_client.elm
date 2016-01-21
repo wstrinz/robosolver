@@ -31,7 +31,7 @@ dummyCell = { name = "dummy", note = "", x = -1, y = -1 }
 cellForCoords : Coords -> Cell
 cellForCoords coords =
   case coords of
-    (x, y) -> dummyCell
+    (x, y) -> makeDummyCell x y
 -- objectForWall : Wall -> WallObject
 -- objectForWall wall obj =
 --   case wall of
@@ -52,7 +52,7 @@ initialModel : Model
 initialModel = { board = initialBoard, activeCells = Set.empty, isClicking = False }
 
 initWalls : Set Wall
-initWalls = Set.fromList [[2,2,1,2],[3,3,4,5]]
+initWalls = Set.fromList [[2,2,1,2],[3,3,4,5],[2,3,2,2],[1,2,1,1]]
 
 initializeRows : Int -> Int -> List (List Cell)
 initializeRows x y = List.map (initRow x) [1..y]
@@ -65,19 +65,6 @@ initCell y x =
       { name = "c",
         x = x, y = y,
         note = "" }
-    -- let
-      -- walls =
-      --   case genWalls of
-      --     True ->
-      --       if x % 3 == 0 then
-      --         singleton "left"
-      --       else if y % 5 == 0 then
-      --         singleton "top"
-      --       else
-      --         Set.empty
-      --     False ->
-      --       Set.empty
-    -- in
 
 
 type CellOperation =
@@ -273,8 +260,8 @@ wallForDir simpleCell direction =
       y = snd simpleCell
   in
     case direction of
-      "left" -> [x, x, y, y + 1]
-      "right" -> [x + 1, x + 1, y, y + 1]
+      "left" -> [x - 1, x - 1, y, y + 1]
+      "right" -> [x, x, y, y + 1]
       "top" -> [x, x + 1, y, y]
       "bottom" -> [x, x + 1, y + 1, y + 1]
       _ -> [-1, -1, -1, -1]
