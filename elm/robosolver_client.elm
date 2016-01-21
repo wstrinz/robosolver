@@ -90,7 +90,7 @@ main = Signal.map (view actions.address) model
 
 wallsForActiveCells : Model -> String -> Set Wall
 wallsForActiveCells model dir =
-  Set.map (\coord -> wallForDir coord dir) model.activeCells
+  Set.map (flip wallForDir <| dir) model.activeCells
 
 update : Action -> Model -> Model
 update action model =
@@ -121,9 +121,7 @@ update action model =
               activeWalls = wallsForActiveCells model dir
 
               toAdd = Set.diff activeWalls model.board.walls
-
               toRemove = Set.intersect activeWalls model.board.walls
-
               newWalls = Set.union (Set.diff model.board.walls toRemove) toAdd
             in
               { model | board = { board | walls = newWalls } }
@@ -136,14 +134,6 @@ updateIfIsCell targetCell newNote currentRow =
               else
                 cell
                 ) currentRow
-
-updateWallsIfCell : Model -> String -> List Cell -> List Cell
-updateWallsIfCell model wall currentRow =
-    List.map (updateWallsIfCellSingular model wall) currentRow
-
--- TODO - currently broken
-updateWallsIfCellSingular : Model -> String -> Cell -> Cell
-updateWallsIfCellSingular model wall currentCell = currentCell
 
 wallCoordsMatch : Wall -> Wall -> Bool
 wallCoordsMatch a b = a == b -- hopefully that's good enough?
@@ -177,7 +167,9 @@ noSelectStyle = [
 findCell : Coords -> Model -> Maybe Cell
 findCell coords model =
   let
-    found = List.head (List.filter (\cell -> coords == (cell.x, cell.y)) (List.concat model.board.rows))
+    found = List.head
+              <| List.filter (\cell -> coords == (cell.x, cell.y))
+              <| List.concat model.board.rows
   in
     found
 
@@ -195,7 +187,9 @@ cellEditor address model =
                        div [] disabledWallButtons]
     Just cell ->
         div [] [
-          p [] (List.map (\thecell -> text ("editing " ++ (toString thecell))) (Set.toList model.activeCells)),
+          p [] <| List.map
+                   (\thecell -> text <| "editing " ++  (toString thecell))
+                   <| Set.toList model.activeCells,
           div [] (realWallButtons address cell)
         ]
 
