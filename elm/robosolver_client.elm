@@ -90,7 +90,7 @@ main = Signal.map (view actions.address) model
 
 wallsForActiveCells : Model -> String -> Set Wall
 wallsForActiveCells model dir =
-    Set.intersect (Set.map (\coord -> wallForDir coord dir) model.activeCells) model.board.walls
+  Set.map (\coord -> wallForDir coord dir) model.activeCells
 
 update : Action -> Model -> Model
 update action model =
@@ -120,15 +120,11 @@ update action model =
             let
               activeWalls = wallsForActiveCells model dir
 
-              toAdd =
-                Set.diff activeWalls model.board.walls
+              toAdd = Set.diff activeWalls model.board.walls
 
-              toRemove =
-                Set.intersect activeWalls model.board.walls
+              toRemove = Set.intersect activeWalls model.board.walls
 
-              newWalls =
-                Set.union walls toAdd
-                -- Set.union (Set.diff model.board.walls toRemove) toAdd
+              newWalls = Set.union (Set.diff model.board.walls toRemove) toAdd
             in
               { model | board = { board | walls = newWalls } }
 
