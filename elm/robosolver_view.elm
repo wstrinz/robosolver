@@ -3,6 +3,7 @@ import Set
 import RobosolverQueries exposing (wallOnCellSide, findCell)
 import RobosolverTypes exposing (Cell, Wall, Model, Action(..), CellOperation(..))
 import RobosolverModel exposing (spaceTypes, entityTypes)
+import RobosolverEncoder exposing (modelToJson)
 import Html exposing (Html, div, text, button, p, br, option)
 import Html.Attributes exposing (src, attribute, style)
 import Html.Events exposing (onClick)
@@ -10,7 +11,7 @@ import Json.Decode exposing (..)
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model = div [Html.Events.onMouseUp address (SetClicking False Nothing), style noSelectStyle] [
-    Html.table [style tableStyle] (cellsDiv address model),
+    Html.table [style (List.append tableStyle noSelectStyle)] (cellsDiv address model),
     button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
     cellEditor address model,
     modelDisp model
@@ -21,8 +22,11 @@ tableStyle = [("border", "solid 1px black"),("width", "80%"),("height","80%"),("
 
 modelDisp : Model -> Html.Html
 modelDisp model = div [] [
-  p [] [text <| toString <| model.board.rows]
+  p [] [text (modelToJson model)]
   ]
+-- modelDisp model = div [] [
+--   p [] [text <| toString <| model.board.rows]
+--   ]
 
 cellEditor : Signal.Address Action -> Model -> Html.Html
 cellEditor address model =
