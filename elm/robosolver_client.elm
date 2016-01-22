@@ -76,7 +76,7 @@ type CellOperation =
 type Action =
   NoOp
     | ResetActiveCells
-    | SetClicking Bool
+    | SetClicking Bool (Maybe Cell)
     | CellUpdate CellOperation Cell
 
 actions : Signal.Mailbox Action
@@ -102,7 +102,16 @@ update action model =
     case action of
       NoOp -> model
       ResetActiveCells -> { model | activeCells = Set.empty }
-      SetClicking val -> { model | isClicking = val }
+      SetClicking val cell ->
+        case cell of
+          Nothing -> { model | isClicking = val }
+          Just c ->
+            if (inActiveCells c model)  then
+              { model | activeCells = Set.remove (c.x, c.y) model.activeCells,
+                        isClicking = val}
+            else
+              { model | activeCells = Set.insert (c.x, c.y) model.activeCells,
+                        isClicking = val }
       CellUpdate operation cell ->
         case operation of
           Nothin -> model
@@ -146,14 +155,16 @@ inActiveCells cell model =
     Set.member (cell.x, cell.y) model.activeCells
 
 view : Signal.Address Action -> Model -> Html.Html
-view address model = div [Html.Events.onMouseUp address (SetClicking False), style noSelectStyle] [
+view address model = div [Html.Events.onMouseUp address (SetClicking False Nothing), style noSelectStyle] [
     button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
     Html.table [style [("border", "solid 1px black")]] (cellsDiv address model),
     cellEditor address model,
     modelDisp model
   ]
 
-modelDisp model = div [] [text (toString (wallsForActiveCells model "right"))]
+modelDisp model = div [] [
+  p [] [text <| toString <| model.board.rows]
+  ]
 
 noSelectStyle = [
   ("-webkit-touch-callout", "none"),
@@ -224,7 +235,7 @@ cellCol : Signal.Address Action -> Model -> Cell -> Html.Html
 cellCol address model cell =
  Html.td [
            style (cellStyle model cell),
-           Html.Events.onMouseDown address (SetClicking True),
+           Html.Events.onMouseDown address (SetClicking True (Just cell)),
            Html.Events.onMouseEnter address (CellUpdate SetActive cell)
          ] [
           p [] [text (cellDesc cell)]
