@@ -17,7 +17,7 @@
 # notification :growl_notify
 
 guard :shell do
-  watch(%r{elm/robosolver_client\.elm}) do
-    `elm make elm/robosolver_client.elm --output elm.js`
+  watch(%r{elm/robosolver_.+\.elm}) do
+    `elm make elm/*.elm --output elm.js`
   end
 end
