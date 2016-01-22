@@ -1,7 +1,7 @@
 module RobosolverModel where
 import Set exposing (Set)
-import RobosolverTypes exposing (..)
-import RobosolverQueries exposing (..)
+import RobosolverTypes exposing (Cell, Model, Wall, Action(..), CellOperation(..), Board, Coords, WallObject)
+import RobosolverQueries exposing (inActiveCells, wallForDir)
 
 blankWallObj : WallObject
 blankWallObj = {startX = -1, endX = -1, startY = -1, endY = -1 }

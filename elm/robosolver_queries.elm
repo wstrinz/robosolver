@@ -1,6 +1,6 @@
 module RobosolverQueries where
 import Set
-import RobosolverTypes exposing (..)
+import RobosolverTypes exposing (Wall, Cell, Coords, Model)
 
 wallCoordsMatch : Wall -> Wall -> Bool
 wallCoordsMatch a b = a == b -- hopefully that's good enough?

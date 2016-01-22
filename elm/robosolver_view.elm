@@ -1,27 +1,17 @@
 module RobosolverView where
 import Set
-import RobosolverQueries exposing (..)
-import RobosolverTypes exposing (..)
+import RobosolverQueries exposing (wallOnCellSide, findCell)
+import RobosolverTypes exposing (Cell, Wall, Model, Action(..), CellOperation(..))
 import Html exposing (Html, div, text, button, p, br)
 import Html.Attributes exposing (src, attribute, style)
 import Html.Events exposing (onClick)
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model = div [Html.Events.onMouseUp address (SetClicking False Nothing), style noSelectStyle] [
-    button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
     Html.table [style [("border", "solid 1px black")]] (cellsDiv address model),
+    button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
     cellEditor address model,
     modelDisp model
-  ]
-
-
-noSelectStyle = [
-  ("-webkit-touch-callout", "none"),
-  ("-webkit-user-select", "none"),
-  ("-khtml-user-select", "none"),
-  ("-moz-user-select", "none"),
-  ("-ms-user-select", "none"),
-  ("user-select", "none")
   ]
 
 modelDisp : Model -> Html.Html
@@ -48,26 +38,6 @@ cellEditor address model =
                    <| Set.toList model.activeCells,
           div [] (realWallButtons address cell)
         ]
-
-realWallButtons : Signal.Address Action -> Cell -> List Html.Html
-realWallButtons address cell = [
-            p [] [text "Toggle Walls"],
-            button [ onClick address (CellUpdate (ToggleWall "left") cell)] [ text "Left" ],
-            button [ onClick address (CellUpdate (ToggleWall "right") cell)] [ text "Right" ],
-            button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
-            button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ],
-            Html.select [ ] [ text "red" ]
-          ]
-
-disabledWallButtons : List Html.Html
-disabledWallButtons =
-  [
-    p [] [text "Toggle Walls"],
-    button [] [ text "Left" ],
-    button [] [ text "Right" ],
-    button [] [ text "Top" ],
-    button [] [ text "Bottom" ]
-    ]
 
 cellsDiv : Signal.Address Action -> Model -> List Html
 cellsDiv address model =
@@ -104,6 +74,37 @@ cellBgStyleList model cell =
     True -> [("background-color", "aqua")]
     False -> []
 
-
 cellDesc : Cell -> String
 cellDesc cell = (cell.name ++ "-" ++ cell.note)
+
+-- buttons
+realWallButtons : Signal.Address Action -> Cell -> List Html.Html
+realWallButtons address cell = [
+            p [] [text "Toggle Walls"],
+            button [ onClick address (CellUpdate (ToggleWall "left") cell)] [ text "Left" ],
+            button [ onClick address (CellUpdate (ToggleWall "right") cell)] [ text "Right" ],
+            button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
+            button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ],
+            Html.select [ ] [ text "red" ]
+          ]
+
+disabledWallButtons : List Html.Html
+disabledWallButtons =
+  [
+    p [] [text "Toggle Walls"],
+    button [] [ text "Left" ],
+    button [] [ text "Right" ],
+    button [] [ text "Top" ],
+    button [] [ text "Bottom" ]
+    ]
+
+-- Styles
+noSelectStyle : List (String, String)
+noSelectStyle = [
+  ("-webkit-touch-callout", "none"),
+  ("-webkit-user-select", "none"),
+  ("-khtml-user-select", "none"),
+  ("-moz-user-select", "none"),
+  ("-ms-user-select", "none"),
+  ("user-select", "none")
+  ]
