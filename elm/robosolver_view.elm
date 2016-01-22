@@ -86,8 +86,10 @@ cellBgStyleList model cell =
 cellDesc : Cell -> String
 cellDesc cell =
   case cell.symbol of
-    "star" -> "*"
+    "star" -> "☆"
     "gear" -> "g"
+    "moon" -> "☾"
+    "planet" -> "ⴲ"
     _ -> (cell.name ++ "-" ++ cell.note)
 
 -- buttons
@@ -113,10 +115,51 @@ spaceSelection address model cell =
 
 idxToSignal :  Signal.Address Action -> Cell -> Int -> Signal.Message
 idxToSignal address cell idx =
+  let
+    messageFor color symbol = Signal.message address (CellUpdate (SelectType (color, symbol)) cell)
+  in
   case idx of
-    1 -> Signal.message address (CellUpdate (SelectType ("red", "star")) cell)
-    2 -> Signal.message address (CellUpdate (SelectType ("blue", "gear")) cell)
-    _ -> Signal.message address (CellUpdate (SelectType ("", "")) cell)
+     1  -> messageFor "red" "star"
+     2  -> messageFor "red" "moon"
+     3  -> messageFor "red" "gear"
+     4  -> messageFor "red" "planet"
+     5  -> messageFor "yellow" "star"
+     6  -> messageFor "yellow" "moon"
+     7  -> messageFor "yellow" "gear"
+     8  -> messageFor "yellow" "planet"
+     9  -> messageFor "blue" "star"
+     10 -> messageFor "blue" "moon"
+     11 -> messageFor "blue" "planet"
+     12 -> messageFor "blue" "gear"
+     13 -> messageFor "green" "star"
+     14 -> messageFor "green" "moon"
+     15 -> messageFor "green" "planet"
+     16 -> messageFor "green" "gear"
+     17 -> messageFor "purple" "wild"
+     _  -> messageFor "" ""
+
+idxForSpaceType : (String, String) -> Int
+idxForSpaceType spaceType =
+  case spaceType of
+      ("red", "star")     -> 1
+      ("red", "moon")     -> 2
+      ("red", "gear")     -> 3
+      ("red", "planet")   -> 4
+      ("yellow", "star")  -> 5
+      ("yellow", "moon")  -> 6
+      ("yellow", "gear")  -> 7
+      ("yellow", "planet")-> 8
+      ("blue", "star")    -> 9
+      ("blue", "moon")    -> 10
+      ("blue", "planet")  -> 11
+      ("blue", "gear")    -> 12
+      ("green", "star")   -> 13
+      ("green", "moon")   -> 14
+      ("green", "planet") -> 15
+      ("green", "gear")   -> 16
+      ("purple", "wild")  -> 17
+      ("", "")            -> 0
+      _                   -> 0
 
 onSelect : Signal.Address Action -> Model -> Cell -> Html.Attribute
 onSelect address model cell =
@@ -125,12 +168,21 @@ onSelect address model cell =
   (idxToSignal address cell)
 
 spaceTypeSelect : Signal.Address Action -> Model -> Cell -> Html.Html
-spaceTypeSelect address model cell = Html.select [onSelect address model cell] spaceTypeOptions
+spaceTypeSelect address model cell = Html.select [onSelect address model cell] <| spaceTypeOptions cell
 
-spaceTypeOptions : List Html.Html
-spaceTypeOptions = List.map
-                     (\t -> option [] [text ((fst t) ++ " " ++ (snd t))])
-                     spaceTypes
+spaceTypeOptions : Cell -> List Html.Html
+spaceTypeOptions cell =
+  let
+    optionProps spaceType =
+      if (cell.color, cell.symbol) == spaceType then
+        [Html.Attributes.selected True]
+      else
+        []
+
+    spaceOption spaceType =
+      option (optionProps spaceType) [text ((fst spaceType) ++ " " ++ (snd spaceType))]
+  in
+    List.map spaceOption spaceTypes
 
 spaceEntityeSelect : Signal.Address Action -> Model -> Cell -> Html.Html
 spaceEntityeSelect address model cell = Html.select [] spaceEntityeOptions

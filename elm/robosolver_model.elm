@@ -18,7 +18,22 @@ dummyCell = { name = "dummy", note = "", x = -1, y = -1, color = "", symbol = ""
 spaceTypes : List (String, String)
 spaceTypes = [("",""),
               ("red", "star"),
-              ("blue", "gear")]
+              ("red", "moon"),
+              ("red", "gear"),
+              ("red", "planet"),
+              ("yellow", "star"),
+              ("yellow", "moon"),
+              ("yellow", "gear"),
+              ("yellow", "planet"),
+              ("blue", "star"),
+              ("blue", "moon"),
+              ("blue", "planet"),
+              ("blue", "gear"),
+              ("green", "star"),
+              ("green", "moon"),
+              ("green", "planet"),
+              ("green", "gear"),
+              ("purple", "wild")]
 
 entityTypes : List (String, String)
 entityTypes = [("",""),
