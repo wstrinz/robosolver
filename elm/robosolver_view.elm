@@ -2,7 +2,8 @@ module RobosolverView where
 import Set
 import RobosolverQueries exposing (wallOnCellSide, findCell)
 import RobosolverTypes exposing (Cell, Wall, Model, Action(..), CellOperation(..))
-import Html exposing (Html, div, text, button, p, br)
+import RobosolverModel exposing (spaceTypes, entityTypes)
+import Html exposing (Html, div, text, button, p, br, option)
 import Html.Attributes exposing (src, attribute, style)
 import Html.Events exposing (onClick)
 
@@ -36,7 +37,7 @@ cellEditor address model =
           p [] <| List.map
                    (\thecell -> text <| "editing " ++  (toString thecell))
                    <| Set.toList model.activeCells,
-          div [] (realWallButtons address cell)
+          div [] (realWallButtons address model cell)
         ]
 
 cellsDiv : Signal.Address Action -> Model -> List Html
@@ -78,8 +79,8 @@ cellDesc : Cell -> String
 cellDesc cell = (cell.name ++ "-" ++ cell.note)
 
 -- buttons
-realWallButtons : Signal.Address Action -> Cell -> List Html.Html
-realWallButtons address cell = [
+realWallButtons : Signal.Address Action -> Model -> Cell -> List Html.Html
+realWallButtons address model cell = [
             p [] [text "Toggle Walls"],
             button [ onClick address (CellUpdate (ClearWalls) cell)] [ text "Clear Walls" ],
             Html.br [] [],
@@ -87,8 +88,32 @@ realWallButtons address cell = [
             button [ onClick address (CellUpdate (ToggleWall "right") cell)] [ text "Right" ],
             button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
             button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ],
-            Html.select [ ] [ text "red" ]
+            Html.br [] [],
+            div [] <| spaceSelection address model cell
           ]
+
+spaceSelection : Signal.Address Action -> Model -> Cell -> List Html.Html
+spaceSelection address model cell =
+  case Set.size model.activeCells of
+    1 -> [(spaceTypeSelect address model cell),
+          (spaceEntityeSelect address model cell)]
+    _ -> []
+
+spaceTypeSelect : Signal.Address Action -> Model -> Cell -> Html.Html
+spaceTypeSelect address model cell = Html.select [] spaceTypeOptions
+
+spaceTypeOptions : List Html.Html
+spaceTypeOptions = List.map
+                     (\t -> option [] [text ((fst t) ++ " " ++ (snd t))])
+                     spaceTypes
+
+spaceEntityeSelect : Signal.Address Action -> Model -> Cell -> Html.Html
+spaceEntityeSelect address model cell = Html.select [] spaceEntityeOptions
+
+spaceEntityeOptions : List Html.Html
+spaceEntityeOptions = List.map
+                     (\t -> option [] [text ((fst t) ++ " " ++ (snd t))])
+                     entityTypes
 
 disabledWallButtons : List Html.Html
 disabledWallButtons =
@@ -99,6 +124,8 @@ disabledWallButtons =
     button [] [ text "Top" ],
     button [] [ text "Bottom" ]
     ]
+
+-- Select Box
 
 -- Styles
 noSelectStyle : List (String, String)

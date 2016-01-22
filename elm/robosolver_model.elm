@@ -15,6 +15,18 @@ makeDummyCell x y = { name = "dummy", note = "", x = x, y = y }
 dummyCell : Cell
 dummyCell = { name = "dummy", note = "", x = -1, y = -1 }
 
+spaceTypes : List (String, String)
+spaceTypes = [("",""),
+              ("red", "star"),
+              ("blue", "gear")]
+
+entityTypes : List (String, String)
+entityTypes = [("",""),
+              ("red", "robot"),
+              ("green", "robot"),
+              ("yellow", "robot"),
+              ("blue", "robot")]
+
 cellForCoords : Coords -> Cell
 cellForCoords coords =
   case coords of
