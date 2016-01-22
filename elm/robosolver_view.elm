@@ -10,11 +10,14 @@ import Json.Decode exposing (..)
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model = div [Html.Events.onMouseUp address (SetClicking False Nothing), style noSelectStyle] [
-    Html.table [style [("border", "solid 1px black")]] (cellsDiv address model),
+    Html.table [style tableStyle] (cellsDiv address model),
     button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
     cellEditor address model,
     modelDisp model
   ]
+
+tableStyle : List (String, String)
+tableStyle = [("border", "solid 1px black"),("width", "80%"),("height","80%"),("font-size","2.5em")]
 
 modelDisp : Model -> Html.Html
 modelDisp model = div [] [
@@ -55,11 +58,11 @@ cellCol address model cell =
            Html.Events.onMouseDown address (SetClicking True (Just cell)),
            Html.Events.onMouseEnter address (CellUpdate SetActive cell)
          ] [
-          p [] [text (cellDesc cell)]
+          p [] [text (cellDesc model cell)]
          ]
 
 cellStyle : Model -> Cell -> List (String, String)
-cellStyle model cell = List.concat([cellWallStyleList model cell, cellBgStyleList model cell])
+cellStyle model cell = List.concat([cellWallStyleList model cell, cellBgStyleList model cell, cellRobitStyleList model cell])
 
 cellWallStyleList : Model -> Cell -> List (String, String)
 cellWallStyleList model cell =
@@ -83,14 +86,31 @@ cellBgStyleList model cell =
         "" -> []
         col -> [("background-color", col)]
 
-cellDesc : Cell -> String
-cellDesc cell =
-  case cell.symbol of
-    "star" -> "☆"
-    "gear" -> "g"
-    "moon" -> "☾"
-    "planet" -> "ⴲ"
-    _ -> (cell.name ++ "-" ++ cell.note)
+cellRobitStyleList : Model -> Cell -> List (String, String)
+cellRobitStyleList model cell =
+  let
+    robotInCell = List.head <| List.filter (\r -> (fst r.coords == cell.x) && (snd r.coords == cell.y)) model.board.robits
+  in
+    case robotInCell of
+      Just robit ->
+        [("font-weight", "bold"), ("color", robit.color)]
+      _ -> []
+
+cellDesc : Model -> Cell -> String
+cellDesc model cell =
+  let
+    robotInCell = List.head <| List.filter (\r -> (fst r.coords == cell.x) && (snd r.coords == cell.y)) model.board.robits
+  in
+    case robotInCell of
+      Just robit ->
+        "☻"
+      _ ->
+        case cell.symbol of
+          "star" -> "☆"
+          "gear" -> "g"
+          "moon" -> "☾"
+          "planet" -> "ⴲ"
+          _ -> (cell.name ++ "-" ++ cell.note)
 
 -- buttons
 realWallButtons : Signal.Address Action -> Model -> Cell -> List Html.Html
@@ -161,11 +181,29 @@ idxForSpaceType spaceType =
       ("", "")            -> 0
       _                   -> 0
 
+robitIdxToSignal :  Signal.Address Action -> Cell -> Int -> Signal.Message
+robitIdxToSignal address cell idx =
+  let
+    messageFor color = Signal.message address (CellUpdate (SetEntity color) cell)
+  in
+  case idx of
+     1  -> messageFor "red"
+     2  -> messageFor "green"
+     3  -> messageFor "yellow"
+     4  -> messageFor "blue"
+     _  -> messageFor ""
+
 onSelect : Signal.Address Action -> Model -> Cell -> Html.Attribute
 onSelect address model cell =
   Html.Events.on "change"
   (Json.Decode.at ["target", "selectedIndex"] Json.Decode.int)
   (idxToSignal address cell)
+
+onSelectRobit : Signal.Address Action -> Model -> Cell -> Html.Attribute
+onSelectRobit address model cell =
+  Html.Events.on "change"
+  (Json.Decode.at ["target", "selectedIndex"] Json.Decode.int)
+  (robitIdxToSignal address cell)
 
 spaceTypeSelect : Signal.Address Action -> Model -> Cell -> Html.Html
 spaceTypeSelect address model cell = Html.select [onSelect address model cell] <| spaceTypeOptions cell
@@ -185,12 +223,20 @@ spaceTypeOptions cell =
     List.map spaceOption spaceTypes
 
 spaceEntityeSelect : Signal.Address Action -> Model -> Cell -> Html.Html
-spaceEntityeSelect address model cell = Html.select [] spaceEntityeOptions
+spaceEntityeSelect address model cell = Html.select [onSelectRobit address model cell] <| spaceEntityOptions model cell
 
-spaceEntityeOptions : List Html.Html
-spaceEntityeOptions = List.map
-                     (\t -> option [] [text ((fst t) ++ " " ++ (snd t))])
-                     entityTypes
+spaceEntityOptions : Model -> Cell -> List Html.Html
+spaceEntityOptions model cell =
+  let
+      robotInCell robitType = List.head <| List.filter (\r -> (fst robitType == r.color) && (fst r.coords) == cell.x && (snd r.coords) == cell.y) model.board.robits
+      optionProps robitType =
+        case robotInCell robitType of
+          Just robit -> [Html.Attributes.selected True]
+          _ -> []
+  in
+    List.map
+      (\t -> option (optionProps t) [text ((fst t) ++ " " ++ (snd t))])
+      entityTypes
 
 disabledWallButtons : List Html.Html
 disabledWallButtons =
