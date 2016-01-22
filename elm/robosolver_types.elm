@@ -10,12 +10,12 @@ type alias Cell = { name: String, x: Int, y: Int, note: String }
 type alias Wall = List Int
 type alias WallObject = { startX: Int, endX: Int, startY: Int, endY: Int }
 
-
 type CellOperation =
   Nothin
     | SetActive
     | SetNote String
     | ToggleWall String
+    | ClearWalls
 
 type Action =
   NoOp

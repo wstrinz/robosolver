@@ -105,6 +105,18 @@ update action model =
               newWalls = Set.union (Set.diff model.board.walls toRemove) toAdd
             in
               { model | board = { board | walls = newWalls } }
+          ClearWalls ->
+            let
+              activeWalls =
+                wallsForActiveCells model "left"
+                 |> Set.union  (wallsForActiveCells model "right")
+                 |> Set.union  (wallsForActiveCells model "top")
+                 |> Set.union  (wallsForActiveCells model "bottom")
+
+              toRemove = Set.intersect model.board.walls activeWalls
+              newWalls = Set.diff model.board.walls toRemove
+            in
+              { model | board = { board | walls = newWalls } }
 
 updateIfIsCell : Cell -> String -> List Cell -> List Cell
 updateIfIsCell targetCell newNote currentRow =

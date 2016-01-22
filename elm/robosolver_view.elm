@@ -81,6 +81,8 @@ cellDesc cell = (cell.name ++ "-" ++ cell.note)
 realWallButtons : Signal.Address Action -> Cell -> List Html.Html
 realWallButtons address cell = [
             p [] [text "Toggle Walls"],
+            button [ onClick address (CellUpdate (ClearWalls) cell)] [ text "Clear Walls" ],
+            Html.br [] [],
             button [ onClick address (CellUpdate (ToggleWall "left") cell)] [ text "Left" ],
             button [ onClick address (CellUpdate (ToggleWall "right") cell)] [ text "Right" ],
             button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
