@@ -10,7 +10,7 @@ import Html.Events exposing (onClick)
 import Json.Decode exposing (..)
 
 view : Signal.Address Action -> Model -> Html.Html
-view address model = div [Html.Events.onMouseUp address (SetClicking False Nothing), style noSelectStyle] [
+view address model = div [Html.Events.onMouseUp address (SetClicking False Nothing)] [
     Html.table [style (List.append tableStyle noSelectStyle)] (cellsDiv address model),
     button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
     cellEditor address model,
