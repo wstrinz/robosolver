@@ -5,10 +5,13 @@ type alias Coords = (Int, Int)
 type alias Model = { board: Board, activeCells: Set (Int, Int), isClicking: Bool }
 type alias Board = { maxx: Int, maxy: Int, rows: List (List Cell), walls: Set Wall }
 
-type alias Cell = { name: String, x: Int, y: Int, note: String }
+type alias Cell = { name: String, x: Int, y: Int, note: String, color: String, symbol: String }
 
 type alias Wall = List Int
 type alias WallObject = { startX: Int, endX: Int, startY: Int, endY: Int }
+
+type alias RobotObject = { x: Int, y: Int, color: String }
+type alias Robot = Set (Int, Int, String)
 
 type CellOperation =
   Nothin
@@ -16,6 +19,7 @@ type CellOperation =
     | SetNote String
     | ToggleWall String
     | ClearWalls
+    | SelectType (String, String)
 
 type Action =
   NoOp

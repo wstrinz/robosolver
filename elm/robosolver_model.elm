@@ -10,10 +10,10 @@ blankWall : Wall
 blankWall = [-1,-1,-1,-1]
 
 makeDummyCell : Int -> Int -> Cell
-makeDummyCell x y = { name = "dummy", note = "", x = x, y = y }
+makeDummyCell x y = { name = "dummy", note = "", x = x, y = y, color = "", symbol = ""}
 
 dummyCell : Cell
-dummyCell = { name = "dummy", note = "", x = -1, y = -1 }
+dummyCell = { name = "dummy", note = "", x = -1, y = -1, color = "", symbol = "" }
 
 spaceTypes : List (String, String)
 spaceTypes = [("",""),
@@ -63,7 +63,9 @@ initCell : Int -> Int -> Cell
 initCell y x =
       { name = "c",
         x = x, y = y,
-        note = "" }
+        note = "",
+        color = "",
+        symbol = "" }
 
 actions : Signal.Mailbox Action
 actions = Signal.mailbox NoOp
@@ -117,6 +119,8 @@ update action model =
               newWalls = Set.union (Set.diff model.board.walls toRemove) toAdd
             in
               { model | board = { board | walls = newWalls } }
+          SelectType newtype ->
+              { model | board = { board | rows = List.map (updateTypeIfIsCell cell newtype ) rows } }
           ClearWalls ->
             let
               activeWalls =
@@ -135,6 +139,16 @@ updateIfIsCell targetCell newNote currentRow =
   List.map (\cell ->
               if cell.x == targetCell.x && cell.y == targetCell.y then
                 {cell | note = newNote}
+              else
+                cell
+                ) currentRow
+
+updateTypeIfIsCell : Cell -> (String, String) -> List Cell -> List Cell
+updateTypeIfIsCell targetCell newtype currentRow =
+  List.map (\cell ->
+              if cell.x == targetCell.x && cell.y == targetCell.y then
+                {cell | color = fst newtype,
+                        symbol = snd newtype}
               else
                 cell
                 ) currentRow

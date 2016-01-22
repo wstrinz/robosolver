@@ -6,6 +6,7 @@ import RobosolverModel exposing (spaceTypes, entityTypes)
 import Html exposing (Html, div, text, button, p, br, option)
 import Html.Attributes exposing (src, attribute, style)
 import Html.Events exposing (onClick)
+import Json.Decode exposing (..)
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model = div [Html.Events.onMouseUp address (SetClicking False Nothing), style noSelectStyle] [
@@ -72,11 +73,22 @@ cellBgStyleList model cell =
       isActive = Set.member (cell.x, cell.y) model.activeCells
   in
   case isActive of
-    True -> [("background-color", "aqua")]
-    False -> []
+    True ->
+      case cell.color of
+        "" -> [("outline", "3px solid aqua")]
+        col -> [("outline", "3px solid aqua"), ("background-color", col)]
+
+    False ->
+      case cell.color of
+        "" -> []
+        col -> [("background-color", col)]
 
 cellDesc : Cell -> String
-cellDesc cell = (cell.name ++ "-" ++ cell.note)
+cellDesc cell =
+  case cell.symbol of
+    "star" -> "*"
+    "gear" -> "g"
+    _ -> (cell.name ++ "-" ++ cell.note)
 
 -- buttons
 realWallButtons : Signal.Address Action -> Model -> Cell -> List Html.Html
@@ -99,8 +111,21 @@ spaceSelection address model cell =
           (spaceEntityeSelect address model cell)]
     _ -> []
 
+idxToSignal :  Signal.Address Action -> Cell -> Int -> Signal.Message
+idxToSignal address cell idx =
+  case idx of
+    1 -> Signal.message address (CellUpdate (SelectType ("red", "star")) cell)
+    2 -> Signal.message address (CellUpdate (SelectType ("blue", "gear")) cell)
+    _ -> Signal.message address (CellUpdate (SelectType ("", "")) cell)
+
+onSelect : Signal.Address Action -> Model -> Cell -> Html.Attribute
+onSelect address model cell =
+  Html.Events.on "change"
+  (Json.Decode.at ["target", "selectedIndex"] Json.Decode.int)
+  (idxToSignal address cell)
+
 spaceTypeSelect : Signal.Address Action -> Model -> Cell -> Html.Html
-spaceTypeSelect address model cell = Html.select [] spaceTypeOptions
+spaceTypeSelect address model cell = Html.select [onSelect address model cell] spaceTypeOptions
 
 spaceTypeOptions : List Html.Html
 spaceTypeOptions = List.map

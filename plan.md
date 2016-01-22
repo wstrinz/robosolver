@@ -4,7 +4,7 @@
 - Elm App
   - [x] Basic Wall/Cell Definition
   - [x] Clear walls action
-  - [ ] Different Cell Types
+  - [x] Different Cell Types
     - robot home
     - destination
     - both?
