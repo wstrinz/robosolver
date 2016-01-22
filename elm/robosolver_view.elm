@@ -63,7 +63,7 @@ cellWallStyleList : Model -> Cell -> List (String, String)
 cellWallStyleList model cell =
   let wallSides = List.filter (wallOnCellSide model cell) ["left", "right", "top", "bottom"]
   in
-    List.map (\w -> ("border-" ++ w, "solid 1px black")) wallSides
+    List.map (\w -> ("border-" ++ w, "solid 2px black")) wallSides
 
 cellBgStyleList : Model -> Cell -> List (String, String)
 cellBgStyleList model cell =
