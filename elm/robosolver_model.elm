@@ -56,9 +56,6 @@ model : Signal Model
 model = Signal.foldp update initialModel <| Signal.merge actions.signal <| Signal.map loadStringAction loadModel
 
 loadStringAction str = LoadModel (RobosolverDecoder.modelFromJson str)
-  -- case maybeModelFromJson str of
-  --   Just model -> LoadModel model
-  --   _ -> NoOp
 
 port loadModel : Signal String
 

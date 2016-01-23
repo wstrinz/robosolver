@@ -10,9 +10,3 @@ import Set exposing (Set, singleton)
 
 main : Signal Html.Html
 main = Signal.map (view actions.address) model
-
-
--- port playSong : Signal String
--- port playSong = Signal.map toString playerActions.signal
-
--- port songPos : Signal Float

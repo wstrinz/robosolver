@@ -1,10 +1,12 @@
 module RobosolverPersistence where
 -- import LocalStorage
-import RobosolverInits exposing (initialModel)
-import RobosolverDecoder exposing (modelFromJson)
-import RobosolverTypes exposing (..)
-import RobosolverEncoder exposing (modelToJson)
-import Task exposing (Task, andThen)
+-- import RobosolverInits exposing (initialModel)
+-- import RobosolverDecoder exposing (modelFromJson)
+-- import RobosolverTypes exposing (..)
+-- import RobosolverEncoder exposing (modelToJson)
+-- import Task exposing (Task, andThen)
+
+-- Disabled for now, just using ports
 
 -- saveModel : Model -> Task LocalStorage.Error String
 -- saveModel model = LocalStorage.set "model-key" (modelToJson model)
