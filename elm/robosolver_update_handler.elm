@@ -16,7 +16,7 @@ update action model =
     SaveModel model -> model
     LoadModel newModel ->
         {model | board = newModel.board,
-                 activeCells = Set.empty}
+                 activeCells = newModel.activeCells }
     FetchModel -> model
 
 
