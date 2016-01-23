@@ -3,6 +3,9 @@ import Set exposing (Set)
 import Json.Encode as ENC exposing (string, int, object, list)
 import RobosolverTypes exposing (..)
 
+modelToJson : Model -> String
+modelToJson model = ENC.encode 0 (jModel model)
+
 jModel : Model -> ENC.Value
 jModel model = object [
     ("board", jBoard model.board),
@@ -38,11 +41,12 @@ jWalls : Set Wall -> ENC.Value
 jWalls walls =
   let
     wallList = Set.toList walls
-
-    listOfEncWalls wall =
-      list <| List.map int wall
+    wallArr = List.map (\wa ->
+      case wa of
+        [xs, xe, ys, ye] -> list [int xs, int xe, int ys, int ye]
+        _ -> list [int -1, int -1, int -1, int -1]) wallList
   in
-    list <| List.map listOfEncWalls wallList
+    list wallArr
 
 jRobits : List Robit -> ENC.Value
 jRobits robits = list <| List.map jRobit robits
@@ -58,10 +62,14 @@ jRobit robit =
     ("coords", list [int x, int y])
   ]
 
-jActiveCells cellSet = list []
-
-modelToJson : Model -> String
-modelToJson model = ENC.encode 0 (jModel model)
+-- jActiveCells cellSet = list []
+jActiveCells : Set (Int, Int) -> ENC.Value
+jActiveCells theCells =
+  let
+    clist = Set.toList theCells
+    realList = List.map (\tc -> list [int (fst tc), int (snd tc)]) clist
+  in
+    list realList
 
 -- modelFromJson : String -> Model
 -- modelFromJson json =
@@ -78,5 +86,3 @@ modelToJson model = ENC.encode 0 (jModel model)
 --     ("countb" := Decode.int)
 --     ("page" := Decode.string)
 --     ("state" := Decode.string)
-
-
