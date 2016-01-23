@@ -111,7 +111,7 @@ cellDesc model cell =
       _ ->
         case cell.symbol of
           "star" -> "☆"
-          "gear" -> "g"
+          "gear" -> "⚙"
           "moon" -> "☾"
           "planet" -> "ⴲ"
           _ -> (cell.name ++ "-" ++ cell.note)
