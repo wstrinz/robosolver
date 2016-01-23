@@ -49,8 +49,7 @@ jWalls walls =
     list wallArr
 
 jRobits : List Robit -> ENC.Value
-jRobits robits =
-   list <| List.map jRobit robits
+jRobits robits = list <| List.map jRobit robits
 
 jRobit : Robit -> ENC.Value
 jRobit robit =
@@ -66,7 +65,6 @@ jRobit robit =
 jActiveCells : Set (Int, Int) -> ENC.Value
 jActiveCells theCells =
   let
-    clist = Set.toList theCells
-    realList = List.map (\tc -> list [int (fst tc), int (snd tc)]) clist
+    tuple2ToList tc = list [int (fst tc), int (snd tc)]
   in
-    list realList
+    list <| List.map tuple2ToList <| Set.toList theCells

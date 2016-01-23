@@ -14,17 +14,16 @@ inActiveCells cell model =
 
 findCell : Coords -> Model -> Maybe Cell
 findCell coords model =
-  let
-    found = List.head
-              <| List.filter (\cell -> coords == (cell.x, cell.y))
-              <| List.concat model.board.rows
-  in
-    found
-
+  List.concat model.board.rows
+    |> List.filter (\cell -> coords == (cell.x, cell.y))
+    |> List.head
 
 wallOnCellSide : Model -> Cell -> String -> Bool
 wallOnCellSide model cell direction =
-  Set.member (wallForDir (cell.x, cell.y) direction) model.board.walls
+  let
+    wall = wallForDir (cell.x, cell.y) direction
+  in
+    Set.member wall model.board.walls
 
 wallForDir : Coords -> String -> Wall
 wallForDir simpleCell direction =

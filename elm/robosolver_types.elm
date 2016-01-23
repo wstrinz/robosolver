@@ -9,10 +9,7 @@ type alias Board = { maxx: Int, maxy: Int, rows: List (List Cell), walls: Set Wa
 type alias Cell = { name: String, x: Int, y: Int, note: String, color: String, symbol: String }
 
 type alias Wall = List Int
-type alias WallObject = { startX: Int, endX: Int, startY: Int, endY: Int }
-
-type alias RobotObject = { x: Int, y: Int, color: String }
-type alias Robot = Set (Int, Int, String)
+-- type alias WallObject = { startX: Int, endX: Int, startY: Int, endY: Int }
 
 type CellOperation =
   Nothin
