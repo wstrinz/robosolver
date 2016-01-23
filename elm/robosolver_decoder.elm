@@ -2,8 +2,15 @@ module RobosolverDecoder where
 import Set exposing (Set)
 import Json.Decode as DEC exposing (int, string, Decoder, (:=), bool)
 import Json.Decode.Extra as DECE
-import RobosolverModel exposing (initialModel)
+import RobosolverInits exposing (initialModel)
 import RobosolverTypes exposing (..)
+
+maybeModelFromJson : String -> Maybe Model
+maybeModelFromJson json =
+  case (DEC.decodeString modelDecoder json) of
+    Result.Ok model -> Just model
+    Result.Err errStr -> Nothing
+
 
 modelFromJson : String -> Model
 modelFromJson json =

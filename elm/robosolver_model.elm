@@ -1,6 +1,9 @@
 module RobosolverModel where
 import Set exposing (Set)
+import RobosolverEncoder exposing (modelToJson)
+import RobosolverDecoder exposing (maybeModelFromJson)
 import RobosolverTypes exposing (Cell, Model, Wall, Action(..), CellOperation(..), Board, Coords, Robit)
+import RobosolverInits exposing (initialModel)
 import RobosolverQueries exposing (inActiveCells, wallForDir)
 import RobosolverUpdateHandler exposing (update)
 
@@ -45,43 +48,28 @@ cellForCoords coords =
   case coords of
     (x, y) -> makeDummyCell x y
 
-initialX : Int
-initialX = 16
-
-initialY : Int
-initialY = 16
-genWalls = False
-
-initialBoard : Board
-initialBoard = { rows = (initializeRows initialX initialY), maxx = initialX, maxy = initialY, walls = initWalls, robits = initRobits }
-
-initialModel : Model
-initialModel = { board = initialBoard, activeCells = Set.empty, isClicking = False }
-
-initRobits : List Robit
-initRobits = [{color = "red", coords = (1, 1)},
-             {color = "blue", coords = (5, 5)},
-             {color = "yellow", coords = (8,8)}]
-
-initWalls : Set Wall
-initWalls = Set.fromList [[2,2,1,2],[3,3,4,5],[2,3,2,2],[1,2,1,1]]
-
-initializeRows : Int -> Int -> List (List Cell)
-initializeRows x y = List.map (initRow x) [1..y]
-
-initRow : Int -> Int -> List Cell
-initRow length y = List.map (initCell y) [1..length]
-
-initCell : Int -> Int -> Cell
-initCell y x =
-      { name = "c",
-        x = x, y = y,
-        note = "",
-        color = "",
-        symbol = "" }
 
 actions : Signal.Mailbox Action
 actions = Signal.mailbox NoOp
 
 model : Signal Model
-model = Signal.foldp update initialModel actions.signal
+model = Signal.foldp update initialModel <| Signal.merge actions.signal <| Signal.map loadStringAction loadModel
+
+loadStringAction str = LoadModel (RobosolverDecoder.modelFromJson str)
+  -- case maybeModelFromJson str of
+  --   Just model -> LoadModel model
+  --   _ -> NoOp
+
+port loadModel : Signal String
+
+port fetchModel : Signal Bool
+port fetchModel = Signal.map (\act ->
+                                case act of
+                                  FetchModel -> True
+                                  _ -> False) actions.signal
+
+port saveModel : Signal (String, Bool)
+port saveModel = Signal.map (\act ->
+                                case act of
+                                  SaveModel model -> (modelToJson model, True)
+                                  _ -> ("", False)) actions.signal

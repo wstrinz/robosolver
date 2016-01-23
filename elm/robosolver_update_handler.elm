@@ -1,7 +1,10 @@
 module RobosolverUpdateHandler where
 import Set exposing (Set)
+import Task exposing (andThen)
 import RobosolverTypes exposing (..)
+import RobosolverDecoder exposing (modelFromJson)
 import RobosolverQueries as Queries
+-- import RobosolverPersistence exposing (saveModel, loadModel)
 
 update : Action -> Model -> Model
 update action model =
@@ -10,6 +13,12 @@ update action model =
     ResetActiveCells -> { model | activeCells = Set.empty }
     SetClicking val cell -> setClicking val cell model
     CellUpdate operation cell -> cellUpdate operation cell model
+    SaveModel model -> model
+    LoadModel newModel ->
+        {model | board = newModel.board,
+                 activeCells = Set.empty}
+    FetchModel -> model
+
 
 setClicking : Bool -> Maybe Cell -> Model -> Model
 setClicking val cell model =

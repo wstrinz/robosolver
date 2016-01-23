@@ -23,5 +23,8 @@ type CellOperation =
 type Action =
   NoOp
     | ResetActiveCells
+    | SaveModel Model
+    | LoadModel Model
+    | FetchModel
     | SetClicking Bool (Maybe Cell)
     | CellUpdate CellOperation Cell

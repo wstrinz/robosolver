@@ -127,8 +127,14 @@ realWallButtons address model cell = [
             button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
             button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ],
             Html.br [] [],
-            div [] <| spaceSelection address model cell
+            div [] <| spaceSelection address model cell,
+            Html.br [] [],
+            div [] <| persistenceControls address model
           ]
+persistenceControls : Signal.Address Action -> Model -> List Html.Html
+persistenceControls address model =
+  [ button [ onClick address (SaveModel model)] [ text "Save" ],
+    button [ onClick address FetchModel ] [ text "Load" ] ]
 
 spaceSelection : Signal.Address Action -> Model -> Cell -> List Html.Html
 spaceSelection address model cell =

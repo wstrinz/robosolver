@@ -1,6 +1,6 @@
 module RobosolverEncoder where
 import Set exposing (Set)
-import Json.Encode as ENC exposing (string, int, object, list)
+import Json.Encode as ENC exposing (string, int, object, list, bool)
 import RobosolverTypes exposing (..)
 
 modelToJson : Model -> String
@@ -9,7 +9,8 @@ modelToJson model = ENC.encode 0 (jModel model)
 jModel : Model -> ENC.Value
 jModel model = object [
     ("board", jBoard model.board),
-    ("activeCells", jActiveCells model.activeCells)
+    ("activeCells", jActiveCells model.activeCells),
+    ("isClicking", bool model.isClicking)
   ]
 
 jBoard : Board -> ENC.Value
