@@ -18,6 +18,7 @@ update action model =
         {model | board = newModel.board,
                  activeCells = newModel.activeCells }
     FetchModel -> model
+    FetchBasicModel -> model
 
 
 setClicking : Bool -> Maybe Cell -> Model -> Model

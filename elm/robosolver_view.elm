@@ -14,6 +14,8 @@ view address model = div [Html.Events.onMouseUp address (SetClicking False Nothi
     Html.table [style (List.append tableStyle noSelectStyle)] (cellsDiv address model),
     button [ onClick address (ResetActiveCells)] [ text "Clear Selection" ],
     cellEditor address model,
+    Html.br [] [],
+    div [] <| persistenceControls address model,
     modelDisp model
   ]
 
@@ -72,7 +74,7 @@ cellWallStyleList : Model -> Cell -> List (String, String)
 cellWallStyleList model cell =
   let wallSides = List.filter (wallOnCellSide model cell) ["left", "right", "top", "bottom"]
   in
-    List.map (\w -> ("border-" ++ w, "solid 2px black")) wallSides
+    List.map (\w -> ("border-" ++ w, "solid 3px black")) wallSides
 
 cellBgStyleList : Model -> Cell -> List (String, String)
 cellBgStyleList model cell =
@@ -127,14 +129,14 @@ realWallButtons address model cell = [
             button [ onClick address (CellUpdate (ToggleWall "top") cell)] [ text "Top" ],
             button [ onClick address (CellUpdate (ToggleWall "bottom") cell)] [ text "Bottom" ],
             Html.br [] [],
-            div [] <| spaceSelection address model cell,
-            Html.br [] [],
-            div [] <| persistenceControls address model
+            div [] <| spaceSelection address model cell
           ]
 persistenceControls : Signal.Address Action -> Model -> List Html.Html
 persistenceControls address model =
   [ button [ onClick address (SaveModel model)] [ text "Save" ],
-    button [ onClick address FetchModel ] [ text "Load" ] ]
+    button [ onClick address FetchModel ] [ text "Load" ],
+    button [ onClick address FetchBasicModel] [ text "Load Base Board" ]
+     ]
 
 spaceSelection : Signal.Address Action -> Model -> Cell -> List Html.Html
 spaceSelection address model cell =

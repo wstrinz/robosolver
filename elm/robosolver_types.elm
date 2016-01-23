@@ -26,5 +26,6 @@ type Action =
     | SaveModel Model
     | LoadModel Model
     | FetchModel
+    | FetchBasicModel
     | SetClicking Bool (Maybe Cell)
     | CellUpdate CellOperation Cell

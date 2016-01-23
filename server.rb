@@ -13,3 +13,7 @@ end
 get "/elm.js" do
   send_file "elm.js"
 end
+
+get "/base_board.json" do
+  open("base_board.json", "r"){|f| f.read }
+end

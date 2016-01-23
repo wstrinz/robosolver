@@ -37,11 +37,31 @@
         }
       });
 
-      client.ports.fetchModel.subscribe(function(doFetch) {
-        if(doFetch){
+      client.ports.fetchModel.subscribe(function(action) {
+        if(action == "FetchModel"){
           var model = localStorage.getItem('model-key');
           console.log("setting model", JSON.parse(model))
           client.ports.loadModel.send(model);
+        }
+        else if (action == "FetchBasicModel") {
+          var request = new XMLHttpRequest();
+          request.open('GET', '/base_board.json', true);
+
+          request.onload = function() {
+            if (request.status >= 200 && request.status < 400) {
+              console.log("sending baseboard to client")
+              var resp = request.responseText;
+              client.ports.loadModel.send(resp);
+            } else {
+              console.log("error fetching baseboard", request)
+            }
+          };
+
+          request.onerror = function() {
+              console.log("error connecting maybe?", args)
+          };
+
+          request.send();
         }
       });
     </script>

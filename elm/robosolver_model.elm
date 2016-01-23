@@ -59,11 +59,8 @@ loadStringAction str = LoadModel (RobosolverDecoder.modelFromJson str)
 
 port loadModel : Signal String
 
-port fetchModel : Signal Bool
-port fetchModel = Signal.map (\act ->
-                                case act of
-                                  FetchModel -> True
-                                  _ -> False) actions.signal
+port fetchModel : Signal String
+port fetchModel = Signal.map toString actions.signal
 
 port saveModel : Signal (String, Bool)
 port saveModel = Signal.map (\act ->
