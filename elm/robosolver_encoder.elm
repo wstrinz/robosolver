@@ -49,7 +49,8 @@ jWalls walls =
     list wallArr
 
 jRobits : List Robit -> ENC.Value
-jRobits robits = list <| List.map jRobit robits
+jRobits robits =
+   list <| List.map jRobit robits
 
 jRobit : Robit -> ENC.Value
 jRobit robit =
@@ -62,7 +63,6 @@ jRobit robit =
     ("coords", list [int x, int y])
   ]
 
--- jActiveCells cellSet = list []
 jActiveCells : Set (Int, Int) -> ENC.Value
 jActiveCells theCells =
   let
@@ -70,19 +70,3 @@ jActiveCells theCells =
     realList = List.map (\tc -> list [int (fst tc), int (snd tc)]) clist
   in
     list realList
-
--- modelFromJson : String -> Model
--- modelFromJson json =
---   let decodeResult = Decode.decodeString modelDecoder json
---   in
---     case decodeResult of
---       Result.Ok mod -> modelFromStringy mod
---       Result.Err errStr -> initialModel
-
--- modelDecoder : Decoder StringyModel
--- modelDecoder =
---   Decode.object4 StringyModel
---     ("counta" := Decode.int)
---     ("countb" := Decode.int)
---     ("page" := Decode.string)
---     ("state" := Decode.string)

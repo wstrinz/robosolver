@@ -46,11 +46,6 @@ cellForCoords : Coords -> Cell
 cellForCoords coords =
   case coords of
     (x, y) -> makeDummyCell x y
--- objectForWall : Wall -> WallObject
--- objectForWall wall obj =
---   case wall of
---     [Just sx, Just ex, Just sy, Just ey, xs] -> { startX = sx, endX = ex, startY = sy, endY = ex }
---     _ -> blankWallObj
 
 initialX : Int
 initialX = 16
@@ -99,64 +94,76 @@ wallsForActiveCells model dir =
 
 update : Action -> Model -> Model
 update action model =
+  case action of
+    NoOp -> model
+    ResetActiveCells -> { model | activeCells = Set.empty }
+    SetClicking val cell -> setClicking val cell model
+    CellUpdate operation cell -> cellUpdate operation cell model
+
+setClicking : Bool -> Maybe Cell -> Model -> Model
+setClicking val cell model =
+  let
+    updateCells op c = { model | activeCells = op (c.x, c.y) model.activeCells,
+                                 isClicking = val }
+  in
+  case cell of
+    Nothing -> { model | isClicking = val }
+    Just c ->
+      case (inActiveCells c model) of
+        True -> updateCells (Set.remove) c
+        False -> updateCells (Set.insert) c
+
+cellUpdate : CellOperation -> Cell -> Model -> Model
+cellUpdate operation cell model =
   let
     board = model.board
     rows = model.board.rows
-    walls = model.board.walls
   in
-    case action of
-      NoOp -> model
-      ResetActiveCells -> { model | activeCells = Set.empty }
-      SetClicking val cell ->
-        case cell of
-          Nothing -> { model | isClicking = val }
-          Just c ->
-            if (inActiveCells c model)  then
-              { model | activeCells = Set.remove (c.x, c.y) model.activeCells,
-                        isClicking = val}
+    case operation of
+      Nothin -> model
+      SetActive ->
+        case model.isClicking of
+          False -> model
+          True ->
+            if (inActiveCells cell model)  then
+              { model | activeCells = Set.remove (cell.x, cell.y) model.activeCells }
             else
-              { model | activeCells = Set.insert (c.x, c.y) model.activeCells,
-                        isClicking = val }
-      CellUpdate operation cell ->
-        case operation of
-          Nothin -> model
-          SetActive ->
-            case model.isClicking of
-              False -> model
-              True ->
-                if (inActiveCells cell model)  then
-                  { model | activeCells = Set.remove (cell.x, cell.y) model.activeCells }
-                else
-                  { model | activeCells = Set.insert (cell.x, cell.y) model.activeCells }
-          SetNote newNote ->
-              { model | board = { board | rows = List.map (updateIfIsCell cell newNote) rows } }
-          ToggleWall dir ->
-            let
-              activeWalls = wallsForActiveCells model dir
+              { model | activeCells = Set.insert (cell.x, cell.y) model.activeCells }
+      SetNote newNote ->
+          { model | board = { board | rows = List.map (updateIfIsCell cell newNote) rows } }
+      ToggleWall dir ->
+        let
+          activeWalls = wallsForActiveCells model dir
 
-              toAdd = Set.diff activeWalls model.board.walls
-              toRemove = Set.intersect activeWalls model.board.walls
-              newWalls = Set.union (Set.diff model.board.walls toRemove) toAdd
-            in
-              { model | board = { board | walls = newWalls } }
-          SelectType newtype ->
-              { model | board = { board | rows = List.map (updateTypeIfIsCell cell newtype ) rows } }
-          SetEntity newEntity ->
-              { model | board =
-                { board | robits =
-                  List.map (updateRobitIfTarget newEntity cell) model.board.robits } }
-          ClearWalls ->
-            let
-              activeWalls =
-                wallsForActiveCells model "left"
-                 |> Set.union  (wallsForActiveCells model "right")
-                 |> Set.union  (wallsForActiveCells model "top")
-                 |> Set.union  (wallsForActiveCells model "bottom")
+          toAdd = Set.diff activeWalls model.board.walls
+          toRemove = Set.intersect activeWalls model.board.walls
+          newWalls = Set.union (Set.diff model.board.walls toRemove) toAdd
+        in
+          { model | board = { board | walls = newWalls } }
+      SelectType newtype ->
+          { model | board = { board | rows = List.map (updateTypeIfIsCell cell newtype ) rows } }
+      SetEntity newEntity ->
+          { model | board =
+            { board | robits =
+              List.map (updateRobitIfTarget newEntity cell) model.board.robits } }
+      ClearWalls -> clearWalls model
 
-              toRemove = Set.intersect model.board.walls activeWalls
-              newWalls = Set.diff model.board.walls toRemove
-            in
-              { model | board = { board | walls = newWalls } }
+clearWalls : Model -> Model
+clearWalls model =
+  let
+    board = model.board
+    walls = model.board.walls
+
+    activeWalls =
+      wallsForActiveCells model "left"
+      |> Set.union  (wallsForActiveCells model "right")
+      |> Set.union  (wallsForActiveCells model "top")
+      |> Set.union  (wallsForActiveCells model "bottom")
+
+    toRemove = Set.intersect model.board.walls activeWalls
+    newWalls = Set.diff model.board.walls toRemove
+  in
+    { model | board = { board | walls = newWalls } }
 
 updateRobitIfTarget : String -> Cell -> Robit -> Robit
 updateRobitIfTarget color loc target =
