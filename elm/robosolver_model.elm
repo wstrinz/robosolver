@@ -48,13 +48,13 @@ cellForCoords coords =
   case coords of
     (x, y) -> makeDummyCell x y
 
-
 actions : Signal.Mailbox Action
 actions = Signal.mailbox NoOp
 
 model : Signal Model
 model = Signal.foldp update initialModel <| Signal.merge actions.signal <| Signal.map loadStringAction loadModel
 
+loadStringAction : String -> Action
 loadStringAction str = LoadModel (RobosolverDecoder.modelFromJson str)
 
 port loadModel : Signal String

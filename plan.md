@@ -8,13 +8,13 @@
     - robot home
     - destination
     - both?
-  - [ ] Serialization (encode)
+  - [x] Serialization (encode)
     - [x] first to JSON
-    - [ ] save in localstorage
+    - [x] save in localstorage
     - [ ] then send to server woo
-  - [ ] Deserialization
+  - [x] Deserialization
     - [x] write deserializer
-    - [ ] persist to local storage as a test
+    - [x] persist to local storage as a test
   - [ ] Server involvement
     - [ ] persist state to server (learn elm/http)
     - [ ] solve on server
@@ -24,6 +24,9 @@
       - [ ] incorporate possible other robot moves
         - simple strategy; search all sets of other robot moves < min path w/o moves
     - [ ] pass server solutions back to client
+  - [ ] Spruce up client
+    - code cleanup
+    - fix inability to unset robits/add new ones
   - [ ] Display solutions in client
     - maybe just start with colored arrow unicodes for paths
     - possibly / probably take a list of moves, and step through them
