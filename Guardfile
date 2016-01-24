@@ -18,6 +18,10 @@
 
 guard :shell do
   watch(%r{elm/robosolver_.+\.elm}) do
-    `elm make elm/*.elm --output elm.js`
+    if /cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM
+      `elm-make elm\\robosolver_client.elm elm\\robosolver_decoder.elm elm\\robosolver_encoder.elm elm\\robosolver_inits.elm elm\\robosolver_model.elm elm\\robosolver_persistence.elm elm\\robosolver_queries.elm elm\\robosolver_types.elm elm\\robosolver_update_handler.elm elm\\robosolver_view.elm --output=elm.js`
+    else
+      `elm make elm/*.elm --output elm.js`
+    end
   end
 end
