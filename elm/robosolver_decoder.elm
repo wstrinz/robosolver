@@ -1,5 +1,6 @@
 module RobosolverDecoder where
 import Set exposing (Set)
+import Dict exposing (Dict)
 import Json.Decode as DEC exposing (int, string, Decoder, (:=), bool)
 import Json.Decode.Extra as DECE
 import RobosolverInits exposing (initialModel)
@@ -22,7 +23,7 @@ modelDecoder : Decoder Model
 modelDecoder =
   DEC.object3 Model
     ("board" := boardDec )
-    ("activeCells" := activeCellsDec)
+    ("activeCells" := activeCellsDec )
     ("isClicking" := bool )
 
 boardDec : Decoder Board
@@ -30,7 +31,7 @@ boardDec =
   DEC.object5 Board
     ("maxx" := int)
     ("maxy" := int)
-    ("rows" := rowsDec )
+    ("cells" := cellsDec )
     ("walls" := wallsDec )
     ("robits" := robitsDec )
 
@@ -49,11 +50,16 @@ wallsDec = DECE.set wallDec
 wallDec : Decoder Wall
 wallDec = DEC.list int
 
-rowsDec : Decoder (List (List Cell))
-rowsDec = DEC.list rowDec
+cellsDec : Decoder (Dict (Int, Int) Cell)
+cellsDec = DEC.dict cellEntriesDec
 
-rowDec : Decoder (List Cell)
-rowDec = DEC.list cellDec
+cellEntriesDec : Decoder ((Int, Int), Cell)
+cellEntriesDec =
+  cellDec `DEC.andThen` cellWithCoords
+
+cellWithCoords : Cell -> Decoder ((Int, Int), Cell)
+cellWithCoords cell =
+  DEC.tuple2 (,) pointDec cellDec
 
 cellDec : Decoder Cell
 cellDec =

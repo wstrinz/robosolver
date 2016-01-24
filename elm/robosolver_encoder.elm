@@ -1,5 +1,6 @@
 module RobosolverEncoder where
 import Set exposing (Set)
+import Dict exposing (Dict)
 import Json.Encode as ENC exposing (string, int, object, list, bool)
 import RobosolverTypes exposing (..)
 
@@ -17,13 +18,16 @@ jBoard : Board -> ENC.Value
 jBoard board = object [
     ("maxx", int board.maxx),
     ("maxy", int board.maxy),
-    ("rows", jRows board.rows),
+    ("cells", jCellDict board.cells),
     ("walls", jWalls board.walls),
     ("robits", jRobits board.robits)
   ]
 
-jRows : List (List Cell) -> ENC.Value
-jRows rows = list <| List.map jCells rows
+jCellDict : Dict (Int, Int) Cell -> ENC.Value
+jCellDict cellDict = list <| List.map (\v -> list [int (fst (fst v)),
+                                                    int (snd (fst v)),
+                                             jCell (snd v)])
+                                             <| Dict.toList cellDict
 
 jCells : List Cell -> ENC.Value
 jCells cells = list <| List.map jCell cells

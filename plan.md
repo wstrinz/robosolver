@@ -47,5 +47,6 @@
 - [ ] Show save / load all the time
 - [ ] fix green robot
 - [ ] show/hide model output button
+- [ ] Build a "show moveable spaces from space" function; you've got the data and the ability to display stuff...
 - [ ] nicer walls
 - [ ] different default BG?
