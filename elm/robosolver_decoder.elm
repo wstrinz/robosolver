@@ -51,7 +51,7 @@ wallDec : Decoder Wall
 wallDec = DEC.list int
 
 cellsDec : Decoder (Dict (Int, Int) Cell)
-cellsDec = DEC.dict cellEntriesDec
+cellsDec = DECE.dict2 pointDec cellDec
 
 cellEntriesDec : Decoder ((Int, Int), Cell)
 cellEntriesDec =

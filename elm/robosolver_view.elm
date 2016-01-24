@@ -1,5 +1,6 @@
 module RobosolverView where
 import Set
+import Dict
 import RobosolverQueries exposing (wallOnCellSide, findCell)
 import RobosolverTypes exposing (Cell, Wall, Model, Action(..), CellOperation(..))
 import RobosolverModel exposing (spaceTypes, entityTypes)
@@ -52,7 +53,7 @@ cellEditor address model =
 
 cellsDiv : Signal.Address Action -> Model -> List Html
 cellsDiv address model =
-  List.map (cellRow address model) model.board.rows
+  List.map (cellRow address model) (Dict.toList model.board.cells)
 
 cellRow : Signal.Address Action -> Model -> List Cell -> Html.Html
 cellRow address model row = Html.tr [] (List.map (cellCol address model) row)

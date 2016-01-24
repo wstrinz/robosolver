@@ -1,5 +1,6 @@
 module RobosolverModel where
 import Set exposing (Set)
+import Dict exposing (Dict)
 import RobosolverEncoder exposing (modelToJson)
 import RobosolverDecoder exposing (maybeModelFromJson)
 import RobosolverTypes exposing (Cell, Model, Wall, Action(..), CellOperation(..), Board, Coords, Robit)
@@ -9,6 +10,12 @@ import RobosolverUpdateHandler exposing (update)
 
 blankWall : Wall
 blankWall = [-1,-1,-1,-1]
+
+dictionaryToMatrix : Dict (Int, Int) Cell -> List (List Cell)
+dictionaryToMatrix dict =
+  -- maybe partition? find max of cells??
+  [[RobosolverInits.initCell 0 0]]
+
 
 makeDummyCell : Int -> Int -> Cell
 makeDummyCell x y = { name = "dummy", note = "", x = x, y = y, color = "", symbol = ""}
