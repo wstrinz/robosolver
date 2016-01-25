@@ -1,18 +1,32 @@
 module RobosolverTypes where
+{-| RobosolverTypes
+
+# Types
+@docs Board, Cell, Coords, MappedCell, Model, Robit, Wall, WallObject, Action, CellOperation, CellDict
+-}
 import Set exposing (Set, singleton)
 import Dict exposing (Dict, singleton)
 
-type alias Coords = (Int, Int)
-type alias Robit = { color: String, coords: Coords }
-type alias Model = { board: Board, activeCells: Set (Int, Int), isClicking: Bool }
-type alias Board = { maxx: Int, maxy: Int, cells: Dict (Int, Int) Cell, walls: Set Wall, robits: List Robit }
-
-type alias Cell = { name: String, x: Int, y: Int, note: String, color: String, symbol: String }
-type alias MappedCell = ((Int, Int), Cell)
-
+{-| Wall -}
 type alias Wall = List Int
--- type alias WallObject = { startX: Int, endX: Int, startY: Int, endY: Int }
-
+{-| WallObject -}
+type alias WallObject = { startX: Int, endX: Int, startY: Int, endY: Int }
+{-| Coords -}
+type alias Coords = (Int, Int)
+{-| Robit -}
+type alias Robit = { color: String, coords: Coords }
+{-| CellDict -}
+type alias CellDict = Dict (Int, Int) Cell
+{-| Cell -}
+type alias Cell = { name: String, x: Int, y: Int, note: String, color: String, symbol: String }
+{-| Board -}
+type alias Board = { maxx: Int, maxy: Int, cells: CellDict, walls: Set Wall, robits: List Robit }
+{-| Model -}
+type alias Model = { board: Board, activeCells: Set (Int, Int), isClicking: Bool }
+{-| MappedCell -}
+type alias MappedCell = ((Int, Int), Cell)
+--
+{-| CellOperation -}
 type CellOperation =
   Nothin
     | SetActive
@@ -22,6 +36,7 @@ type CellOperation =
     | SelectType (String, String)
     | SetEntity String
 
+{-| Action -}
 type Action =
   NoOp
     | ResetActiveCells

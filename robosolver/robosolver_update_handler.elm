@@ -1,4 +1,10 @@
-module RobosolverUpdateHandler where
+module RobosolverUpdateHandler (update) where
+{-| Robosolver Updater
+
+# Types
+@docs update
+-}
+import Dict exposing (Dict)
 import Set exposing (Set)
 import Task exposing (andThen)
 import RobosolverTypes exposing (..)
@@ -6,6 +12,7 @@ import RobosolverDecoder exposing (modelFromJson)
 import RobosolverQueries as Queries
 -- import RobosolverPersistence exposing (saveModel, loadModel)
 
+{-| update -}
 update : Action -> Model -> Model
 update action model =
   case action of
@@ -38,7 +45,7 @@ cellUpdate : CellOperation -> Cell -> Model -> Model
 cellUpdate operation cell model =
   let
     board = model.board
-    rows = model.board.rows
+    cells = model.board.cells
   in
     case operation of
       Nothin -> model
@@ -51,7 +58,7 @@ cellUpdate operation cell model =
             else
               { model | activeCells = Set.insert (cell.x, cell.y) model.activeCells }
       SetNote newNote ->
-          { model | board = { board | rows = List.map (updateIfIsCell cell newNote) rows } }
+          { model | board = { board | cells = updateCellNote cell cells newNote } }
       ToggleWall dir ->
         let
           activeWalls = wallsForActiveCells model dir
@@ -62,7 +69,7 @@ cellUpdate operation cell model =
         in
           { model | board = { board | walls = newWalls } }
       SelectType newtype ->
-          { model | board = { board | rows = List.map (updateTypeIfIsCell cell newtype ) rows } }
+          { model | board = { board | cells = updateCellType cell cells newtype } }
       SetEntity newEntity ->
           { model | board =
             { board | robits =
@@ -93,24 +100,20 @@ updateRobitIfTarget color loc target =
   else
     target
 
-updateIfIsCell : Cell -> String -> List Cell -> List Cell
-updateIfIsCell targetCell newNote currentRow =
-  List.map (\cell ->
-              if cell.x == targetCell.x && cell.y == targetCell.y then
-                {cell | note = newNote}
-              else
-                cell
-                ) currentRow
+updateCellNote : Cell -> CellDict -> String -> CellDict
+updateCellNote cell dict newNote =
+  Dict.insert (cell.x, cell.y) { cell | note = newNote} dict
+  -- List.map (\cell ->
+  --             if cell.x == targetCell.x && cell.y == targetCell.y then
+  --               {cell | note = newNote}
+  --             else
+  --               cell
+  --               ) currentRow
 
-updateTypeIfIsCell : Cell -> (String, String) -> List Cell -> List Cell
-updateTypeIfIsCell targetCell newtype currentRow =
-  List.map (\cell ->
-              if cell.x == targetCell.x && cell.y == targetCell.y then
-                {cell | color = fst newtype,
-                        symbol = snd newtype}
-              else
-                cell
-                ) currentRow
+updateCellType : Cell -> CellDict -> (String, String) -> CellDict
+updateCellType cell dict newType =
+  Dict.insert (cell.x, cell.y) {cell | color = fst newType,
+                                       symbol = snd newType} dict
 
 wallsForActiveCells : Model -> String -> Set Wall
 wallsForActiveCells model dir =

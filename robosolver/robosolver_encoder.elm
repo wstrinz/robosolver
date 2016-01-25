@@ -1,9 +1,15 @@
-module RobosolverEncoder where
+module RobosolverEncoder (modelToJson) where
+{-| Robosolver Encoder
+
+# Types
+@docs modelToJson
+-}
 import Set exposing (Set)
 import Dict exposing (Dict)
 import Json.Encode as ENC exposing (string, int, object, list, bool)
 import RobosolverTypes exposing (..)
 
+{-| modelToJson -}
 modelToJson : Model -> String
 modelToJson model = ENC.encode 0 (jModel model)
 

@@ -1,4 +1,9 @@
-module RobosolverModel where
+module RobosolverModel (model, actions, entityTypes, spaceTypes) where
+{-| RobosolverModel
+
+# Types
+@docs model, actions, entityTypes, spaceTypes
+-}
 import Set exposing (Set)
 import Dict exposing (Dict)
 import RobosolverEncoder exposing (modelToJson)
@@ -23,6 +28,7 @@ makeDummyCell x y = { name = "dummy", note = "", x = x, y = y, color = "", symbo
 dummyCell : Cell
 dummyCell = { name = "dummy", note = "", x = -1, y = -1, color = "", symbol = "" }
 
+{-| spaceTypes -}
 spaceTypes : List (String, String)
 spaceTypes = [("",""),
               ("red", "star"),
@@ -43,6 +49,7 @@ spaceTypes = [("",""),
               ("green", "gear"),
               ("purple", "wild")]
 
+{-| entityTypes -}
 entityTypes : List (String, String)
 entityTypes = [("",""),
               ("red", "robot"),
@@ -55,9 +62,11 @@ cellForCoords coords =
   case coords of
     (x, y) -> makeDummyCell x y
 
+{-| actions -}
 actions : Signal.Mailbox Action
 actions = Signal.mailbox NoOp
 
+{-| model -}
 model : Signal Model
 model = Signal.foldp update initialModel <| Signal.merge actions.signal <| Signal.map loadStringAction loadModel
 

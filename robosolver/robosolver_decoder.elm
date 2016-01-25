@@ -1,4 +1,9 @@
-module RobosolverDecoder where
+module RobosolverDecoder (modelFromJson, maybeModelFromJson) where
+{-| Robosolver Decoder
+
+# Types
+@docs modelFromJson, maybeModelFromJson
+-}
 import Set exposing (Set)
 import Dict exposing (Dict)
 import Json.Decode as DEC exposing (int, string, Decoder, (:=), bool)
@@ -6,6 +11,7 @@ import Json.Decode.Extra as DECE
 import RobosolverInits exposing (initialModel)
 import RobosolverTypes exposing (..)
 
+{-| convert model, return nothing if fails -}
 maybeModelFromJson : String -> Maybe Model
 maybeModelFromJson json =
   case (DEC.decodeString modelDecoder json) of
@@ -13,6 +19,7 @@ maybeModelFromJson json =
     Result.Err errStr -> Nothing
 
 
+{-| convert model -}
 modelFromJson : String -> Model
 modelFromJson json =
   case (DEC.decodeString modelDecoder json) of

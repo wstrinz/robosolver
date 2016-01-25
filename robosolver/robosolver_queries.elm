@@ -1,23 +1,32 @@
 module RobosolverQueries where
+{-| RobosolverQueries
+
+# Types
+@docs coordsMatch, findCell, inActiveCells, wallCoordsMatch, wallForDir, wallOnCellSide
+-}
 import Set
+import Dict
 import RobosolverTypes exposing (Wall, Cell, Coords, Model)
 
+{-| wallCoordsMatch -}
 wallCoordsMatch : Wall -> Wall -> Bool
 wallCoordsMatch a b = a == b -- hopefully that's good enough?
 
+{-| coordsMatch -}
 coordsMatch : Cell -> Cell -> Bool
 coordsMatch a b = a.x == b.x && a.y == b.y
 
+{-| inActiveCells -}
 inActiveCells : Cell -> Model -> Bool
 inActiveCells cell model =
     Set.member (cell.x, cell.y) model.activeCells
 
+{-| findCell -}
 findCell : Coords -> Model -> Maybe Cell
 findCell coords model =
-  List.concat model.board.rows
-    |> List.filter (\cell -> coords == (cell.x, cell.y))
-    |> List.head
+  Dict.get coords model.board.cells
 
+{-| wallOnCellSide -}
 wallOnCellSide : Model -> Cell -> String -> Bool
 wallOnCellSide model cell direction =
   let
@@ -25,6 +34,7 @@ wallOnCellSide model cell direction =
   in
     Set.member wall model.board.walls
 
+{-| wallForDir -}
 wallForDir : Coords -> String -> Wall
 wallForDir simpleCell direction =
   let

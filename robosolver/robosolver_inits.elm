@@ -1,4 +1,9 @@
-module RobosolverInits where
+module RobosolverInits (initialModel, initCell) where
+{-| Robosolver Inits
+
+# Types
+@docs initialModel, initCell
+-}
 import Set exposing (Set)
 import Dict exposing (Dict)
 import RobosolverTypes exposing (..)
@@ -16,6 +21,7 @@ initialBoard = { cells = (initializeCells initialX initialY),
                  walls = initWalls,
                  robits = initRobits }
 
+{-| dummy model -}
 initialModel : Model
 initialModel = { board = initialBoard, activeCells = Set.empty, isClicking = False }
 
@@ -56,6 +62,7 @@ createMappedCell y x = ((x,y), (initCell y x))
 initRow : Int -> Int -> List Cell
 initRow length y = List.map (initCell y) [1..length]
 
+{-| initCell -}
 initCell : Int -> Int -> Cell
 initCell y x =
       { name = "c",

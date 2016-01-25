@@ -1,15 +1,22 @@
-module RobosolverView where
+module RobosolverView (view) where
+{-| RobosolverView
+
+# Types
+@docs view
+-}
 import Set
 import Dict
 import RobosolverQueries exposing (wallOnCellSide, findCell)
 import RobosolverTypes exposing (Cell, Wall, Model, Action(..), CellOperation(..))
 import RobosolverModel exposing (spaceTypes, entityTypes)
 import RobosolverEncoder exposing (modelToJson)
+import RobosolverInits exposing (initCell)
 import Html exposing (Html, div, text, button, p, br, option)
 import Html.Attributes exposing (src, attribute, style)
 import Html.Events exposing (onClick)
 import Json.Decode exposing (..)
 
+{-| view -}
 view : Signal.Address Action -> Model -> Html.Html
 view address model = div [Html.Events.onMouseUp address (SetClicking False Nothing)] [
     Html.table [style (List.append tableStyle noSelectStyle)] (cellsDiv address model),
@@ -53,10 +60,18 @@ cellEditor address model =
 
 cellsDiv : Signal.Address Action -> Model -> List Html
 cellsDiv address model =
-  List.map (cellRow address model) (Dict.toList model.board.cells)
+  let
+    cellEl x y =
+      case Dict.get (x,y) model.board.cells of
+        Just cell -> cellCol address model cell
+        _ -> cellCol address model (RobosolverInits.initCell x y)
 
-cellRow : Signal.Address Action -> Model -> List Cell -> Html.Html
-cellRow address model row = Html.tr [] (List.map (cellCol address model) row)
+    cellRow y = Html.tr [] <| List.map (flip cellEl <| y) [1..model.board.maxx]
+  in
+    List.map cellRow [1..model.board.maxy]
+
+-- cellRow : Signal.Address Action -> Model -> List Cell -> Html.Html
+-- cellRow address model row = Html.tr [] (List.map (cellCol address model) row)
 
 cellCol : Signal.Address Action -> Model -> Cell -> Html.Html
 cellCol address model cell =

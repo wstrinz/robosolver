@@ -1,4 +1,9 @@
 module RobosolverClient where
+{-| RobosolverClient
+
+# Types
+@docs main
+-}
 import RobosolverView exposing (view)
 import RobosolverModel exposing (actions, model)
 import Html exposing (Html, div, text, button, p, br)
@@ -8,5 +13,6 @@ import Signal -- exposing (Html)
 import List exposing (map , (::))
 import Set exposing (Set, singleton)
 
+{-| main function -}
 main : Signal Html.Html
 main = Signal.map (view actions.address) model

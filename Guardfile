@@ -17,11 +17,11 @@
 # notification :growl_notify
 
 guard :shell do
-  watch(%r{elm/robosolver_.+\.elm}) do
+  watch(%r{robosolver/robosolver_.+\.elm}) do
     if /cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM
-      `elm-make elm\\robosolver_client.elm elm\\robosolver_decoder.elm elm\\robosolver_encoder.elm elm\\robosolver_inits.elm elm\\robosolver_model.elm elm\\robosolver_persistence.elm elm\\robosolver_queries.elm elm\\robosolver_types.elm elm\\robosolver_update_handler.elm elm\\robosolver_view.elm --output=elm.js`
+      `elm-make robosolver\\robosolver_types.elm robosolver\\robosolver_client.elm robosolver\\robosolver_decoder.elm robosolver\\robosolver_encoder.elm robosolver\\robosolver_inits.elm robosolver\\robosolver_model.elm robosolver\\robosolver_persistence.elm  robosolver\\robosolver_queries.elm  robosolver\\robosolver_update_handler.elm robosolver\\robosolver_view.elm --output=elm.js`
     else
-      `elm make elm/*.elm --output elm.js`
+      `elm make robosolver/*.elm --output elm.js`
     end
   end
 end

@@ -4,9 +4,20 @@
     "repository": "https://github.com/user/project.git",
     "license": "BSD3",
     "source-directories": [
-        "elm"
+        "robosolver"
     ],
-    "exposed-modules": [],
+    "exposed-modules": [
+      "RobosolverTypes",
+      "RobosolverQueries",
+      "RobosolverUpdateHandler",
+      "RobosolverView",
+      "RobosolverEncoder",
+      "RobosolverDecoder",
+      "RobosolverInits",
+      "RobosolverModel",
+      "RobosolverPersistence",
+      "RobosolverClient"
+    ],
     "dependencies": {
         "circuithub/elm-json-extra": "2.2.1 <= v < 3.0.0",
         "elm-lang/core": "3.0.0 <= v < 4.0.0",
