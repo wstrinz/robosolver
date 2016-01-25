@@ -8,11 +8,14 @@
     <div id="elm-container"></div>
     <script type="text/javascript">
       var div = document.getElementById('elm-container');
-      var initialModel = { board: [[]],
+      var aCell = {}
+      aCell[[1,1]] = {name:"c",x:1,y:1,note:"",color:"",symbol:""}
+      var initRobit = [{"color":"yellow","coords":[8,8]}]
+      var initialModel = { board: {maxx: 16, maxy: 16, cells: aCell, walls: [[1,1,2,1]], robits: initRobit},
                            activeCells: [],
                            isClicking: false }
 
-      var inits = { loadModel: JSON.stringify(initialModel) }
+      var inits = { loadModel: [1, JSON.stringify(initialModel)] }
 
       var client = Elm.embed(Elm.RobosolverClient, div, inits);
 
@@ -41,7 +44,7 @@
         if(action == "FetchModel"){
           var model = localStorage.getItem('model-key');
           console.log("setting model", JSON.parse(model))
-          client.ports.loadModel.send(model);
+          client.ports.loadModel.send([1, model]);
         }
         else if (action == "FetchBasicModel") {
           var request = new XMLHttpRequest();
@@ -51,7 +54,7 @@
             if (request.status >= 200 && request.status < 400) {
               console.log("sending baseboard to client")
               var resp = request.responseText;
-              client.ports.loadModel.send(resp);
+              client.ports.loadModel.send([0, resp]);
             } else {
               console.log("error fetching baseboard", request)
             }

@@ -2,7 +2,9 @@ module RobosolverTypes where
 {-| RobosolverTypes
 
 # Types
-@docs Board, Cell, Coords, MappedCell, Model, Robit, Wall, WallObject, Action, CellOperation, CellDict
+@docs Board, Cell, Coords, MappedCell, Model, Robit, Wall,
+      WallObject, Action, CellOperation, CellDict,
+      LegacyModel, LegacyBoard
 -}
 import Set exposing (Set, singleton)
 import Dict exposing (Dict, singleton)
@@ -46,3 +48,11 @@ type Action =
     | FetchBasicModel
     | SetClicking Bool (Maybe Cell)
     | CellUpdate CellOperation Cell
+
+
+-- 'Legacy' types
+
+{-| LegacyModel -}
+type alias LegacyBoard = { maxx: Int, maxy: Int, rows: List (List Cell), walls: Set Wall, robits: List Robit }
+{-| LegacyBoard -}
+type alias LegacyModel = { board: LegacyBoard, activeCells: Set (Int, Int), isClicking: Bool }

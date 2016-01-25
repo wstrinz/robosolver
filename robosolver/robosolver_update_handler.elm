@@ -4,6 +4,7 @@ module RobosolverUpdateHandler (update) where
 # Types
 @docs update
 -}
+import Debug
 import Dict exposing (Dict)
 import Set exposing (Set)
 import Task exposing (andThen)
@@ -21,12 +22,15 @@ update action model =
     SetClicking val cell -> setClicking val cell model
     CellUpdate operation cell -> cellUpdate operation cell model
     SaveModel model -> model
-    LoadModel newModel ->
-        {model | board = newModel.board,
-                 activeCells = newModel.activeCells }
+    LoadModel newModel -> loadModel newModel model
     FetchModel -> model
     FetchBasicModel -> model
 
+
+loadModel : Model -> Model -> Model
+loadModel newModel model =
+  {model | board = newModel.board,
+           activeCells = newModel.activeCells }
 
 setClicking : Bool -> Maybe Cell -> Model -> Model
 setClicking val cell model =

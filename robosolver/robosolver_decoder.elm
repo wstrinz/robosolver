@@ -1,14 +1,14 @@
-module RobosolverDecoder (modelFromJson, maybeModelFromJson) where
+module RobosolverDecoder (modelFromJson, maybeModelFromJson, decodeLegacyModel) where
 {-| Robosolver Decoder
 
 # Types
-@docs modelFromJson, maybeModelFromJson
+@docs modelFromJson, maybeModelFromJson, decodeLegacyModel
 -}
 import Set exposing (Set)
 import Dict exposing (Dict)
 import Json.Decode as DEC exposing (int, string, Decoder, (:=), bool)
 import Json.Decode.Extra as DECE
-import RobosolverInits exposing (initialModel)
+import RobosolverInits exposing (initialModel, blankModel)
 import RobosolverTypes exposing (..)
 
 {-| convert model, return nothing if fails -}
@@ -18,13 +18,12 @@ maybeModelFromJson json =
     Result.Ok model -> Just model
     Result.Err errStr -> Nothing
 
-
 {-| convert model -}
 modelFromJson : String -> Model
 modelFromJson json =
   case (DEC.decodeString modelDecoder json) of
     Result.Ok model -> model
-    Result.Err errStr -> initialModel
+    Result.Err errStr -> Debug.log ("parse error " ++ errStr ++ " \n") initialModel
 
 modelDecoder : Decoder Model
 modelDecoder =
@@ -85,3 +84,62 @@ activeCellsDec =
 pointDec : Decoder (Int, Int)
 pointDec =
   DEC.tuple2 (,) int int
+
+-- Legacy decoders; pointless but kind of an experiment
+{-| outward facing legacy decorder -}
+decodeLegacyModel : String -> Model
+decodeLegacyModel json =
+  let
+    maybeModel = modelFromLegacyJson json
+
+  in
+    case maybeModel of
+      Just m -> legacyToCurrent m
+      _ -> blankModel
+
+legacyBoardToCurrent : LegacyBoard -> Board
+legacyBoardToCurrent legBoard =
+  let
+    board = legBoard
+    convertedRow row =
+      List.map (\c -> ((c.x, c.y), c)) row
+    rowsToCells =
+      List.concat <| List.map convertedRow board.rows
+  in
+    {
+      maxx = board.maxx,
+      maxy = board.maxy,
+      robits = board.robits,
+      cells = (Dict.fromList rowsToCells),
+      walls = board.walls
+    }
+
+{-| convert old model -}
+legacyToCurrent : LegacyModel -> Model
+legacyToCurrent model =
+  { board = legacyBoardToCurrent model.board,
+    activeCells = model.activeCells,
+    isClicking = model.isClicking }
+
+{-| legacy converter -}
+modelFromLegacyJson : String -> Maybe LegacyModel
+modelFromLegacyJson json =
+  case (DEC.decodeString legacyModelDecoder json) of
+    Result.Ok m -> Just m
+    Result.Err errStr -> Debug.log ("parse error" ++ errStr) Nothing
+
+legacyModelDecoder : Decoder LegacyModel
+legacyModelDecoder =
+  DEC.object3 LegacyModel
+    ("board" := legacyBoardDec )
+    ("activeCells" := activeCellsDec )
+    ("isClicking" := bool )
+
+legacyBoardDec : Decoder LegacyBoard
+legacyBoardDec =
+  DEC.object5 LegacyBoard
+    ("maxx" := int)
+    ("maxy" := int)
+    ("rows" := (DEC.list <| DEC.list cellDec) )
+    ("walls" := wallsDec )
+    ("robits" := robitsDec )

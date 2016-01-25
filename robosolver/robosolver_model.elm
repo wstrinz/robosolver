@@ -9,18 +9,12 @@ import Dict exposing (Dict)
 import RobosolverEncoder exposing (modelToJson)
 import RobosolverDecoder exposing (maybeModelFromJson)
 import RobosolverTypes exposing (Cell, Model, Wall, Action(..), CellOperation(..), Board, Coords, Robit)
-import RobosolverInits exposing (initialModel)
+import RobosolverInits exposing (initialModel, blankModel)
 import RobosolverQueries exposing (inActiveCells, wallForDir)
 import RobosolverUpdateHandler exposing (update)
 
 blankWall : Wall
 blankWall = [-1,-1,-1,-1]
-
-dictionaryToMatrix : Dict (Int, Int) Cell -> List (List Cell)
-dictionaryToMatrix dict =
-  -- maybe partition? find max of cells??
-  [[RobosolverInits.initCell 0 0]]
-
 
 makeDummyCell : Int -> Int -> Cell
 makeDummyCell x y = { name = "dummy", note = "", x = x, y = y, color = "", symbol = ""}
@@ -70,10 +64,17 @@ actions = Signal.mailbox NoOp
 model : Signal Model
 model = Signal.foldp update initialModel <| Signal.merge actions.signal <| Signal.map loadStringAction loadModel
 
-loadStringAction : String -> Action
-loadStringAction str = LoadModel (RobosolverDecoder.modelFromJson str)
+loadStringAction : (Int, String) -> Action
+loadStringAction msg =
+   let
+     version = fst msg
+     str = snd msg
+   in
+     case version of
+       0 -> LoadModel (RobosolverDecoder.decodeLegacyModel str)
+       _ -> LoadModel (RobosolverDecoder.modelFromJson str)
 
-port loadModel : Signal String
+port loadModel : Signal (Int, String)
 
 port fetchModel : Signal String
 port fetchModel = Signal.map toString actions.signal
