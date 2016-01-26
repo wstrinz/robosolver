@@ -30,10 +30,9 @@ jBoard board = object [
   ]
 
 jCellDict : Dict (Int, Int) Cell -> ENC.Value
-jCellDict cellDict = list <| List.map (\v -> list [int (fst (fst v)),
-                                                    int (snd (fst v)),
-                                             jCell (snd v)])
-                                             <| Dict.toList cellDict
+jCellDict cellDict = list
+                      <| List.map jCell
+                      <| Dict.values cellDict
 
 jCells : List Cell -> ENC.Value
 jCells cells = list <| List.map jCell cells

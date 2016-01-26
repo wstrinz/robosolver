@@ -69,15 +69,6 @@ createRow width yCoord =
 createMappedCell : Int -> Int -> ((Int, Int), Cell)
 createMappedCell y x = ((x,y), (initCell y x))
 
-
--- dict.insert 2 "lo" d
--- dict.fromlist [(1,"hi"),(2,"lo")] : dict.dict number string
--- > a = array.fromlist [(1, "hi"), (2, "lo"),(3, "g")]
--- array.fromlist [(1,"hi"),(2,"lo"),(3,"g")] : array.array ( number, string )
--- > array.foldl
--- <function: foldl> : (a -> b -> b) -> b -> array.array a -> b
--- > array.foldl (\val dic -> dict.insert (fst val) (snd val) dic) d a
-
 initRow : Int -> Int -> List Cell
 initRow length y = List.map (initCell y) [1..length]
 

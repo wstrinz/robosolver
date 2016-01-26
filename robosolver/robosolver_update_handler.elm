@@ -107,13 +107,7 @@ updateRobitIfTarget color loc target =
 updateCellNote : Cell -> CellDict -> String -> CellDict
 updateCellNote cell dict newNote =
   Dict.insert (cell.x, cell.y) { cell | note = newNote} dict
-  -- List.map (\cell ->
-  --             if cell.x == targetCell.x && cell.y == targetCell.y then
-  --               {cell | note = newNote}
-  --             else
-  --               cell
-  --               ) currentRow
-
+  
 updateCellType : Cell -> CellDict -> (String, String) -> CellDict
 updateCellType cell dict newType =
   Dict.insert (cell.x, cell.y) {cell | color = fst newType,

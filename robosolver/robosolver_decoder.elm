@@ -11,61 +11,60 @@ import Json.Decode.Extra as DECE
 import RobosolverInits exposing (initialModel, blankModel)
 import RobosolverTypes exposing (..)
 
+{- Model aliases w/ lists, because dicts are hard -}
+type alias ListBoard = { maxx: Int, maxy: Int, cells: List Cell, walls: Set Wall, robits: List Robit }
+type alias ListModel = { board: ListBoard, activeCells: Set (Int, Int), isClicking: Bool }
+
 {-| convert model, return nothing if fails -}
 maybeModelFromJson : String -> Maybe Model
 maybeModelFromJson json =
   case (DEC.decodeString modelDecoder json) of
-    Result.Ok model -> Just model
+    Result.Ok model -> Just <| modelFromListModel model
     Result.Err errStr -> Nothing
 
 {-| convert model -}
 modelFromJson : String -> Model
 modelFromJson json =
   case (DEC.decodeString modelDecoder json) of
-    Result.Ok model -> model
+    Result.Ok model -> modelFromListModel model
     Result.Err errStr -> Debug.log ("parse error " ++ errStr ++ " \n") initialModel
 
-modelDecoder : Decoder Model
+modelFromListModel : ListModel -> Model
+modelFromListModel model =
+  let
+    board = model.board
+    listToDict cellList =
+      Dict.fromList <| List.map (\c -> ((c.x, c.y), c)) cellList
+  in
+    {model | board = { board | cells = listToDict model.board.cells} }
+
+modelDecoder : Decoder ListModel
 modelDecoder =
-  DEC.object3 Model
+  DEC.object3 ListModel
     ("board" := boardDec )
     ("activeCells" := activeCellsDec )
     ("isClicking" := bool )
 
-boardDec : Decoder Board
+boardDec : Decoder ListBoard
 boardDec =
-  DEC.object5 Board
+  DEC.object5 ListBoard
     ("maxx" := int)
     ("maxy" := int)
-    ("cells" := cellsDec )
-    ("walls" := wallsDec )
-    ("robits" := robitsDec )
+    ("cells" := (DEC.list cellDec) )
+    ("walls" := wallsDec)
+    ("robits" := (DEC.list robitDec) )
 
 robitsDec : Decoder (List Robit)
 robitsDec = DEC.list robitDec
+
+wallsDec : Decoder (Set Wall)
+wallsDec = DECE.set <| DEC.list int
 
 robitDec : Decoder Robit
 robitDec =
   DEC.object2 Robit
     ("color" := string)
     ("coords" := DEC.tuple2 (,) int int)
-
-wallsDec : Decoder (Set Wall)
-wallsDec = DECE.set wallDec
-
-wallDec : Decoder Wall
-wallDec = DEC.list int
-
-cellsDec : Decoder (Dict (Int, Int) Cell)
-cellsDec = DECE.dict2 pointDec cellDec
-
-cellEntriesDec : Decoder ((Int, Int), Cell)
-cellEntriesDec =
-  cellDec `DEC.andThen` cellWithCoords
-
-cellWithCoords : Cell -> Decoder ((Int, Int), Cell)
-cellWithCoords cell =
-  DEC.tuple2 (,) pointDec cellDec
 
 cellDec : Decoder Cell
 cellDec =
