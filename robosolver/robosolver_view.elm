@@ -125,7 +125,9 @@ cellBgStyleList model cell =
         "" -> [("outline", "3px solid red")]
         col -> [("outline", "3px solid aqua"), ("background-color", col)]
     else
-      []
+      case cell.color of
+        "" -> []
+        col -> [("background-color", col)]
 
 cellRobitStyleList : Model -> Cell -> List (String, String)
 cellRobitStyleList model cell =

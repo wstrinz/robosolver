@@ -1,6 +1,10 @@
 module RobosolverPersistence where
--- import LocalStorage
--- import RobosolverInits exposing (initialModel)
+{-| Robosolver Persistence
+
+# Types
+@docs a
+-}
+import RobosolverInits exposing (initialModel)
 -- import RobosolverDecoder exposing (modelFromJson)
 -- import RobosolverTypes exposing (..)
 -- import RobosolverEncoder exposing (modelToJson)
@@ -22,4 +26,6 @@ module RobosolverPersistence where
 --
 --
 
+{-| placeholder -}
+a : Int
 a = 1
