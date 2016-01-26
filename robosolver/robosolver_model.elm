@@ -1,16 +1,16 @@
-module RobosolverModel (model, actions, entityTypes, spaceTypes) where
+module RobosolverModel (model, actions, entityTypes, spaceTypes, reachableCells) where
 {-| RobosolverModel
 
 # Types
-@docs model, actions, entityTypes, spaceTypes
+@docs model, actions, entityTypes, spaceTypes, reachableCells
 -}
 import Set exposing (Set)
 import Dict exposing (Dict)
 import RobosolverEncoder exposing (modelToJson)
 import RobosolverDecoder exposing (maybeModelFromJson)
 import RobosolverTypes exposing (Cell, Model, Wall, Action(..), CellOperation(..), Board, Coords, Robit)
-import RobosolverInits exposing (initialModel, blankModel)
-import RobosolverQueries exposing (inActiveCells, wallForDir)
+import RobosolverInits exposing (initialModel, blankModel, initCell)
+import RobosolverQueries exposing (inActiveCells, wallForDir, findCell)
 import RobosolverUpdateHandler exposing (update)
 
 blankWall : Wall
@@ -73,6 +73,32 @@ loadStringAction msg =
      case version of
        0 -> LoadModel (RobosolverDecoder.decodeLegacyModel str)
        _ -> LoadModel (RobosolverDecoder.modelFromJson str)
+
+cellsToLeftOf : Int -> Int -> Model -> List Cell
+cellsToLeftOf rowLength y model =
+  let
+    toLeftOf xc =
+      case findCell (xc, y) model of
+        Just c -> c
+        _ -> initCell -1 -1
+  in
+    List.map toLeftOf [1..rowLength]
+
+hasWallInDir : String -> Model -> Cell -> Bool
+hasWallInDir dir m c =
+  Set.member (wallForDir (c.x, c.y) dir) m.board.walls
+
+{-| cells wot can be reached -}
+reachableCells : Model -> Cell -> List Cell
+reachableCells m cell =
+  let
+    leftMoves =
+      List.filter (hasWallInDir "left" m) (cellsToLeftOf cell.x cell.y m)
+    -- rightMove =
+    -- topMove =
+    -- bottomMove =
+  in
+    leftMoves
 
 port loadModel : Signal (Int, String)
 

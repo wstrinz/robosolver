@@ -8,7 +8,7 @@ import Set
 import Dict
 import RobosolverQueries exposing (wallOnCellSide, findCell)
 import RobosolverTypes exposing (Cell, Wall, Model, Action(..), CellOperation(..))
-import RobosolverModel exposing (spaceTypes, entityTypes)
+import RobosolverModel exposing (spaceTypes, entityTypes, reachableCells)
 import RobosolverEncoder exposing (modelToJson)
 import RobosolverInits exposing (initCell)
 import Html exposing (Html, div, text, button, p, br, option)
@@ -84,7 +84,10 @@ cellCol address model cell =
          ]
 
 cellStyle : Model -> Cell -> List (String, String)
-cellStyle model cell = List.concat([cellWallStyleList model cell, cellBgStyleList model cell, cellRobitStyleList model cell])
+cellStyle model cell =
+  List.concat([cellWallStyleList model cell,
+               cellBgStyleList model cell,
+               cellRobitStyleList model cell])
 
 cellWallStyleList : Model -> Cell -> List (String, String)
 cellWallStyleList model cell =
@@ -96,17 +99,36 @@ cellBgStyleList : Model -> Cell -> List (String, String)
 cellBgStyleList model cell =
   let
       isActive = Set.member (cell.x, cell.y) model.activeCells
-  in
-  case isActive of
-    True ->
-      case cell.color of
-        "" -> [("outline", "3px solid aqua")]
-        col -> [("outline", "3px solid aqua"), ("background-color", col)]
+      firstActive =
+        case List.head (Set.toList model.activeCells) of
+          Just c ->
+            case findCell c model of
+              Just theCell -> theCell
+              _ -> initCell -1 -1
+          _ -> initCell -1 -1
 
-    False ->
-      case cell.color of
-        "" -> []
-        col -> [("background-color", col)]
+      isReachable =
+        case Set.isEmpty model.activeCells of
+          False ->
+            if List.member cell (reachableCells model cell) then
+              True
+            else
+              False
+          _ -> False
+  in
+    case isReachable of
+      True ->
+        case isActive of
+          True ->
+            case cell.color of
+              "" -> [("outline", "3px solid aqua")]
+              col -> [("outline", "3px solid aqua"), ("background-color", col)]
+          False ->
+            [("outline", "3px solid red")]
+      False ->
+        case cell.color of
+          "" -> []
+          col -> [("background-color", col)]
 
 cellRobitStyleList : Model -> Cell -> List (String, String)
 cellRobitStyleList model cell =
