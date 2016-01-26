@@ -110,25 +110,22 @@ cellBgStyleList model cell =
       isReachable =
         case Set.isEmpty model.activeCells of
           False ->
-            if List.member cell (reachableCells model cell) then
+            if List.member cell (reachableCells model firstActive) then
               True
             else
               False
           _ -> False
   in
-    case isReachable of
-      True ->
-        case isActive of
-          True ->
-            case cell.color of
-              "" -> [("outline", "3px solid aqua")]
-              col -> [("outline", "3px solid aqua"), ("background-color", col)]
-          False ->
-            [("outline", "3px solid red")]
-      False ->
-        case cell.color of
-          "" -> []
-          col -> [("background-color", col)]
+    if isActive then
+      case cell.color of
+        "" -> [("outline", "3px solid aqua")]
+        col -> [("outline", "3px solid aqua"), ("background-color", col)]
+    else if isReachable then
+      case cell.color of
+        "" -> [("outline", "3px solid red")]
+        col -> [("outline", "3px solid aqua"), ("background-color", col)]
+    else
+      []
 
 cellRobitStyleList : Model -> Cell -> List (String, String)
 cellRobitStyleList model cell =
