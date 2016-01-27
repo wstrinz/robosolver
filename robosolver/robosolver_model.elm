@@ -74,15 +74,20 @@ loadStringAction msg =
        0 -> LoadModel (RobosolverDecoder.decodeLegacyModel str)
        _ -> LoadModel (RobosolverDecoder.modelFromJson str)
 
+
+cellFindWithDefault : Int -> Model -> Int -> Cell
+cellFindWithDefault y model x =
+ case findCell (x, y) model of
+   Just c -> c
+   _ -> initCell -1 -1
+
 cellToLeft : Int -> Int -> Model -> List Cell
 cellToLeft rowLength y model =
-  let
-    toLeftOf xc =
-      case findCell (xc, y) model of
-        Just c -> c
-        _ -> initCell -1 -1
-  in
-    List.map toLeftOf [1..rowLength]
+    List.map (cellFindWithDefault y model) [1..rowLength]
+
+cellToRight : Int -> Int -> Model -> List Cell
+cellToRight rowLength y model =
+    List.map (cellFindWithDefault y model) [rowLength..(model.board.maxx)]
 
 hasWallInDir : String -> Model -> Cell -> Bool
 hasWallInDir dir m c =
@@ -94,14 +99,16 @@ reachableCells m cell =
   let
     leftMoves =
       List.filter (hasWallInDir "left" m) (cellToLeft cell.x cell.y m)
+    rightMoves =
+      List.filter (hasWallInDir "right" m) (cellToRight cell.x cell.y m)
     leftMove = case List.head (List.reverse leftMoves) of
       Just c -> c
       _ -> initCell -1 -1
-    -- rightMove =
-    -- topMove =
-    -- bottomMove =
+    rightMove = case List.head rightMoves of
+      Just c -> c
+      _ -> initCell -1 -1
   in
-     [leftMove]
+     [leftMove, rightMove]
 
 port loadModel : Signal (Int, String)
 
