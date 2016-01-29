@@ -81,13 +81,26 @@ cellFindWithDefault y model x =
    Just c -> c
    _ -> initCell -1 -1
 
-cellToLeft : Int -> Int -> Model -> List Cell
-cellToLeft rowLength y model =
-    List.map (cellFindWithDefault y model) [1..rowLength]
 
-cellToRight : Int -> Int -> Model -> List Cell
-cellToRight rowLength y model =
-    List.map (cellFindWithDefault y model) [rowLength..(model.board.maxx)]
+cellsToLeft : Int -> Int -> Model -> List Cell
+cellsToLeft x y model =
+    List.map (cellFindWithDefault y model) [1..x]
+
+cellsToRight : Int -> Int -> Model -> List Cell
+cellsToRight x y model =
+    List.map (cellFindWithDefault y model) [x..(model.board.maxx)]
+
+-- indiciesForDir : Cell -> Model -> Direction -> List Int
+-- indiciesForDir cell model dir =
+--     case dir of
+--       Left ->
+--       Right ->
+--       Top ->
+--       Bottom ->
+
+-- cellsInDir : Cell -> Model -> Dir -> List Cell
+-- cellsInDir cell model dir =
+--   case dir
 
 hasWallInDir : String -> Model -> Cell -> Bool
 hasWallInDir dir m c =
@@ -98,9 +111,9 @@ reachableCells : Model -> Cell -> List Cell
 reachableCells m cell =
   let
     leftMoves =
-      List.filter (hasWallInDir "left" m) (cellToLeft cell.x cell.y m)
+      List.filter (hasWallInDir "left" m) (cellsToLeft cell.x cell.y m)
     rightMoves =
-      List.filter (hasWallInDir "right" m) (cellToRight cell.x cell.y m)
+      List.filter (hasWallInDir "right" m) (cellsToRight cell.x cell.y m)
     leftMove = case List.head (List.reverse leftMoves) of
       Just c -> c
       _ -> initCell -1 -1

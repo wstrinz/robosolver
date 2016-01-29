@@ -123,7 +123,7 @@ cellBgStyleList model cell =
     else if isReachable then
       case cell.color of
         "" -> [("outline", "3px solid red")]
-        col -> [("outline", "3px solid aqua"), ("background-color", col)]
+        col -> [("outline", "3px solid red"), ("background-color", col)]
     else
       case cell.color of
         "" -> []

@@ -107,7 +107,7 @@ updateRobitIfTarget color loc target =
 updateCellNote : Cell -> CellDict -> String -> CellDict
 updateCellNote cell dict newNote =
   Dict.insert (cell.x, cell.y) { cell | note = newNote} dict
-  
+
 updateCellType : Cell -> CellDict -> (String, String) -> CellDict
 updateCellType cell dict newType =
   Dict.insert (cell.x, cell.y) {cell | color = fst newType,

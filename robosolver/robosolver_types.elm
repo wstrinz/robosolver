@@ -4,7 +4,7 @@ module RobosolverTypes where
 # Types
 @docs Board, Cell, Coords, MappedCell, Model, Robit, Wall,
       WallObject, Action, CellOperation, CellDict,
-      LegacyModel, LegacyBoard
+      LegacyModel, LegacyBoard, Direction
 -}
 import Set exposing (Set, singleton)
 import Dict exposing (Dict, singleton)
@@ -48,6 +48,13 @@ type Action =
     | FetchBasicModel
     | SetClicking Bool (Maybe Cell)
     | CellUpdate CellOperation Cell
+
+{-| Direction -}
+type Direction =
+  Left
+    | Right
+    | Top
+    | Bottom
 
 
 -- 'Legacy' types
