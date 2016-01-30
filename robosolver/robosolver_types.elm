@@ -4,13 +4,18 @@ module RobosolverTypes where
 # Types
 @docs Board, Cell, Coords, MappedCell, Model, Robit, Wall,
       WallObject, Action, CellOperation, CellDict,
-      LegacyModel, LegacyBoard, Direction
+      LegacyModel, LegacyBoard, Direction, WallShape
 -}
 import Set exposing (Set, singleton)
 import Dict exposing (Dict, singleton)
 
 {-| Wall -}
-type alias Wall = List Int
+type alias Wall = (WallShape, String)
+
+{-| WallShape -}
+type alias WallShape = (Int, Int, Int, Int)
+
+
 {-| WallObject -}
 type alias WallObject = { startX: Int, endX: Int, startY: Int, endY: Int }
 {-| Coords -}
@@ -56,10 +61,17 @@ type Direction =
     | Top
     | Bottom
 
+{-| WallColor -}
+-- type WallColor =
+--   Black
+--     | Yellow
+--     | Green
+--     | Blue
+--     | Red
 
 -- 'Legacy' types
 
 {-| LegacyModel -}
-type alias LegacyBoard = { maxx: Int, maxy: Int, rows: List (List Cell), walls: Set Wall, robits: List Robit }
+type alias LegacyBoard = { maxx: Int, maxy: Int, rows: List (List Cell), walls: List (List Int), robits: List Robit }
 {-| LegacyBoard -}
 type alias LegacyModel = { board: LegacyBoard, activeCells: Set (Int, Int), isClicking: Bool }

@@ -49,14 +49,17 @@ jCell cell = object [
 
 jWalls : Set Wall -> ENC.Value
 jWalls walls =
+  jWall <| Set.toList walls
+
+jWall : List Wall -> ENC.Value
+jWall walls =
   let
-    wallList = Set.toList walls
-    wallArr = List.map (\wa ->
-      case wa of
-        [xs, xe, ys, ye] -> list [int xs, int xe, int ys, int ye]
-        _ -> list [int -1, int -1, int -1, int -1]) wallList
+    encWall w =
+      case w of
+        ((xs, xe, ys, ye), color) -> list [list [int xs, int xe, int ys, int ye], string color]
   in
-    list wallArr
+    list <| List.map encWall walls
+
 
 jRobits : List Robit -> ENC.Value
 jRobits robits = list <| List.map jRobit robits

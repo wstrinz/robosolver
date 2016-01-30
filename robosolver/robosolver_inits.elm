@@ -42,7 +42,10 @@ initRobits = [{color = "red", coords = (1, 1)},
              {color = "yellow", coords = (8,8)}]
 
 initWalls : Set Wall
-initWalls = Set.fromList [[2,2,1,2],[3,3,4,5],[2,3,2,2],[1,2,1,1]]
+initWalls = Set.fromList [((2,2,1,2), "black"),
+                          ((3,3,4,5), "black"),
+                          ((2,3,2,2), "black"),
+                          ((1,2,1,1), "black")]
 
 initializeCells : Int -> Int -> CellDict
 initializeCells x y = cellMap x y

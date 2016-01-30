@@ -58,7 +58,10 @@ robitsDec : Decoder (List Robit)
 robitsDec = DEC.list robitDec
 
 wallsDec : Decoder (Set Wall)
-wallsDec = DECE.set <| DEC.list int
+wallsDec = DECE.set wallDec
+
+wallDec : Decoder Wall
+wallDec = DEC.tuple2 (,) (DEC.tuple4 (,,,) int int int int) string
 
 robitDec : Decoder Robit
 robitDec =
@@ -96,6 +99,12 @@ decodeLegacyModel json =
       Just m -> legacyToCurrent m
       _ -> blankModel
 
+makeBlackWall : List Int -> Wall
+makeBlackWall shape =
+  case shape of
+    [xs, xe, ys, ye] -> ((xs,xe,ys,ye), "black")
+    _ -> ((-1,-1,-1,-1), "black")
+
 legacyBoardToCurrent : LegacyBoard -> Board
 legacyBoardToCurrent legBoard =
   let
@@ -104,13 +113,14 @@ legacyBoardToCurrent legBoard =
       List.map (\c -> ((c.x, c.y), c)) row
     rowsToCells =
       List.concat <| List.map convertedRow board.rows
+
   in
     {
       maxx = board.maxx,
       maxy = board.maxy,
       robits = board.robits,
       cells = (Dict.fromList rowsToCells),
-      walls = board.walls
+      walls = Set.fromList <| List.map makeBlackWall board.walls
     }
 
 {-| convert old model -}
@@ -140,5 +150,5 @@ legacyBoardDec =
     ("maxx" := int)
     ("maxy" := int)
     ("rows" := (DEC.list <| DEC.list cellDec) )
-    ("walls" := wallsDec )
+    ("walls" := (DEC.list <| DEC.list int) )
     ("robits" := robitsDec )

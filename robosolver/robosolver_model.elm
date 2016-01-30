@@ -14,7 +14,7 @@ import RobosolverQueries exposing (inActiveCells, wallForDir, findCell)
 import RobosolverUpdateHandler exposing (update)
 
 blankWall : Wall
-blankWall = [-1,-1,-1,-1]
+blankWall = ((-1,-1,-1,-1), "Black")
 
 makeDummyCell : Int -> Int -> Cell
 makeDummyCell x y = { name = "dummy", note = "", x = x, y = y, color = "", symbol = ""}

@@ -40,10 +40,11 @@ wallForDir simpleCell direction =
   let
       x = fst simpleCell
       y = snd simpleCell
+      shape = case direction of
+        "left" -> (x - 1, x - 1, y, y + 1)
+        "right" -> (x, x, y, y + 1)
+        "top" -> (x, x + 1, y, y)
+        "bottom" -> (x, x + 1, y + 1, y + 1)
+        _ -> (-1, -1, -1, -1)
   in
-    case direction of
-      "left" -> [x - 1, x - 1, y, y + 1]
-      "right" -> [x, x, y, y + 1]
-      "top" -> [x, x + 1, y, y]
-      "bottom" -> [x, x + 1, y + 1, y + 1]
-      _ -> [-1, -1, -1, -1]
+      (shape, "black")
